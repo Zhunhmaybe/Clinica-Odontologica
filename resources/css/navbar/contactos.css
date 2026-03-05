@@ -1,0 +1,30 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+.section-title {
+    color: #0f4c75;
+    font-weight: bold;
+}
+.contact-card {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    background: white;
+    height: 100%;
+}
+.contact-icon {
+    font-size: 30px;
+    color: #0f4c75;
+}
+.contact-card h5 {
+    font-weight: bold;
+    margin-top: 15px;
+}
+footer {
+    background-color: #0f4c75;
+    color: white;
+    padding: 15px 0;
+}
+.bg-custom-contact {
+    background-color: #f4f9fc;
+}
