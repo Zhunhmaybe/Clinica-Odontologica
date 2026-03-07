@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('nombre', 100);
+            $table->string('tel', 10)->nullable();
+            $table->string('email', 100)->unique();
             $table->string('password');
+            $table->integer('estado')->default(1)->comment('1=Activo, 2=Inactivo');
+            $table->integer('failed_attempts')->default(0);
+            $table->integer('is_locked')->default(0);
+            $table->string('lock_code', 10)->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->boolean('two_factor_enabled')->default(false)->after('estado');
+            $table->string('two_factor_code', 6)->nullable()->after('two_factor_enabled');
+            $table->timestamp('two_factor_expires_at')->nullable()->after('two_factor_code');
             $table->rememberToken();
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {

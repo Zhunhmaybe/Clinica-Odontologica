@@ -1,10 +1,13 @@
 @extends('layouts.p1_home')
 
+{{--cabecera de la pagina--}}
 @section('title','Comunicate con nostros')
+
 @push('styles')
     @vite('resources/css/navbar/contactos.css')
 @endpush
 
+{{--Cuerpo de la pagina--}}
 @section('content')
         <section class="py-5 bg-custom-contact">
         <div class="container">

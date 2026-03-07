@@ -20,8 +20,8 @@
             </a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li><a class="nav-link text-white" href="">Ingresar</a></li>
-                    <li><a class="nav-link text-white" href="">Servicios</a></li>
+                    <li><a class="nav-link text-white" href="{{ route('login') }}">Ingresar</a></li>
+                    <li><a class="nav-link text-white" href="{{ route('servicios')}}">Servicios</a></li>
                     <li><a class="nav-link text-white" href="{{ route('contacto')}}">Contactanos</a></li>
                 </ul>
             </div>
