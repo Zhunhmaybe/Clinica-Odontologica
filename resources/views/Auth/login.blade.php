@@ -32,10 +32,8 @@
                 </div>
             @endif
 
-
             <form method="POST" action="{{ url('/login') }}">
                 @csrf
-
                 <div class="mb-3">
                     <label class="form-label">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}"
@@ -68,9 +66,9 @@
 
                 <div class="text-center mt-3">
                     <span style="font-size: 13px;">¿No tienes cuenta?</span>
-                    <a href="#" class="register-link">Regístrate</a>
+                    <a href="{{ route('register') }}" class="register-link">Regístrate</a>
                     <p></p>
-                    <a href="#" class="volver-link">Volver</a>
+                    <a href="{{ route('home') }}" class="volver-link">Volver</a>
                 </div>
             </form>
 
