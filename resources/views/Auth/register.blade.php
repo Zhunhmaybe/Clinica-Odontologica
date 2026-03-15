@@ -1,5 +1,4 @@
 @extends('layouts.insole_login')
-
 @section('title','Registrarse')
 @push('styles')
     @vite('resources/css/login/register.css')
@@ -83,11 +82,7 @@
                         class="form-control"
                         required>
                 </div>
-
-
-
                 <button type="submit" class="btn btn-register">Registrarse</button>
-
                 <div class="text-center mt-3">
                     ¿Ya tienes cuenta?
                     <a href="{{ url('/login') }}" class="link-login">Inicia Sesión</a>

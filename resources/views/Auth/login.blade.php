@@ -57,7 +57,7 @@
                         <input class="form-check-input" type="checkbox" name="remember" id="remember">
                         <label class="form-check-label" for="remember">Recordarme</label>
                     </div>
-                    <a href="#" class="link-text">
+                    <a href="{{ route('password.request') }}" class="link-text">
                         ¿Olvidaste tu contraseña?
                     </a>
                 </div>

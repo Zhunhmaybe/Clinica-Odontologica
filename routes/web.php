@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\request\PasswordResetController;
 
 
 //inicio
@@ -39,8 +40,17 @@ Route::middleware(['auth'])->group(function(){
         if($user->hasRole('usuario')){
             return redirect()->route('usuario.index');
         }
-        elseif($user->hasRole('')){
-            return redirect()->route('usuario.index');
+        elseif($user->hasRole('recepcionista')){
+            return redirect()->route('recepcionista.index');
+        }
+        elseif($user->hasRole('auditor')){
+            return redirect()->route('auditor.index');
+        }
+        elseif($user->hasRole('admin')){
+            return redirect()->route('admin.index');
+        }
+        elseif($user->hasRole('doctor')){
+            return redirect()->route('doctor.index');
         }
         
         return redirect('/');
@@ -48,4 +58,30 @@ Route::middleware(['auth'])->group(function(){
 
     // Rutas para cada rol    
     Route::get('/usuario', function() { return view('usuario.index'); })->name('usuario.index');
+    Route::get('/recepcionista',function(){return view('recepcionista.index');})->name('recepcionista.index');
+    Route::get('/auditor',function(){return view('auditor.index');})->name('auditor.index');
+    Route::get('/admin',function(){return view('admin.index');})->name('admin.index');
+    Route::get('/doctor',function(){return view('doctor.index');})->name('doctor.index');
 });
+
+//recuperar contrasena
+Route::get('/forgot-password', [PasswordResetController::class, 'form'])
+    ->name('password.request');
+
+Route::post('/forgot-password', [PasswordResetController::class, 'send'])
+    ->name('password.email');
+
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])
+    ->name('password.reset');
+
+Route::post('/reset-password', [PasswordResetController::class, 'update'])
+    ->name('password.update');
+
+//Desbloquear cuenta
+Route::get('/unlock', [AuthController::class, 'unlockForm'])->name('lock.form');
+Route::post('/unlock', [AuthController::class, 'unlock'])->name('lock.verify');
+
+// Rutas 2FA (fuera de guest para que funcionen después del primer login)
+Route::get('/2fa/verify', [AuthController::class, 'showTwoFactorForm'])->name('2fa.verify');
+Route::post('/2fa/verify', [AuthController::class, 'verifyTwoFactor'])->name('2fa.verify.post');
+Route::post('/2fa/resend', [AuthController::class, 'resendTwoFactorCode'])->name('2fa.resend');
