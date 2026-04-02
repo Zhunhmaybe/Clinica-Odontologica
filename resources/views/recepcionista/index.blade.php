@@ -1,1 +1,3 @@
-<h1>Recepcionista</h1>
+@extends('layouts.nav-bar')
+@section('title','Inicio')
+

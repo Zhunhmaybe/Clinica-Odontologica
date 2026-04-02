@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\request\PasswordResetController;
+use App\Http\Controllers\Actions\ProfileController;
 
 
 //inicio
@@ -28,7 +29,6 @@ Route::middleware('guest')->group(function(){
 });
 
 Route::get('/salir-prueba', [AuthController::class, 'logout']);
-
 
 Route::middleware(['auth'])->group(function(){
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -62,6 +62,19 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/auditor',function(){return view('auditor.index');})->name('auditor.index');
     Route::get('/admin',function(){return view('admin.index');})->name('admin.index');
     Route::get('/doctor',function(){return view('doctor.index');})->name('doctor.index');
+
+    // Editar perfil
+    Route::get('/perfil/editar', [AuthController::class, 'editProfile'])
+        ->name('recepcionista.edit');
+
+    Route::put('/perfil/actualizar', [AuthController::class, 'updateProfile'])
+        ->name('perfil.update');
+
+    // Rutas de perfil para gestionar 2FA
+    Route::get('/profile/2fa', [ProfileController::class, 'show2FA'])->name('profile.2fa');
+    Route::post('/profile/2fa/enable', [ProfileController::class, 'enable2FA'])->name('profile.2fa.enable');
+    Route::post('/profile/2fa/disable', [ProfileController::class, 'disable2FA'])->name('profile.2fa.disable');
+
 });
 
 //recuperar contrasena
@@ -85,3 +98,9 @@ Route::post('/unlock', [AuthController::class, 'unlock'])->name('lock.verify');
 Route::get('/2fa/verify', [AuthController::class, 'showTwoFactorForm'])->name('2fa.verify');
 Route::post('/2fa/verify', [AuthController::class, 'verifyTwoFactor'])->name('2fa.verify.post');
 Route::post('/2fa/resend', [AuthController::class, 'resendTwoFactorCode'])->name('2fa.resend');
+
+//-----------------------------------------------------------Roles y acciones
+
+Route::middleware(['auth','role:recepcionista'])->group(function(){
+    
+});

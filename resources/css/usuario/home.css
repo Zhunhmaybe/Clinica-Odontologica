@@ -11,10 +11,9 @@ body {
 }
 
 .content {
-    margin-left: 260px;
-    /* Mismo ancho que el sidebar */
+    margin-left: 300px;
     padding: 30px 40px;
-    width: calc(90%);
+    width: calc(95%);
     min-height: 100vh;
     transition: all 0.3s;
 }
