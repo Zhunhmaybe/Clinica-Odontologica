@@ -68,7 +68,7 @@
                     <span style="font-size: 13px;">¿No tienes cuenta?</span>
                     <a href="{{ route('register') }}" class="register-link">Regístrate</a>
                     <p></p>
-                    <a href="{{ route('home') }}" class="volver-link">Volver</a>
+                    <a href="{{ route('home') }}" class="volver-link btn btn-outline-secondary btn-cancel">Volver</a>
                 </div>
             </form>
 

@@ -2,14 +2,13 @@
 @section('title','Inicio')
 
 @section('content')
-    <section class="hero text-center">
-        <div class="container">
-            <h1>Tu sonrisa, nuestra prioridad</h1>
-            <p class="mt-3">
+    <section class="hero text-center py-5 px-3">
+        <div class="container py-4">
+            <h1 class="display-4 fw-bold">Tu sonrisa, nuestra prioridad</h1>
+            <p class="lead mt-3 mx-auto" style="max-width: 700px;">
                 En el Consultorio Odontológico Danny brindamos atención profesional,
                 humana y de calidad para el cuidado integral de tu salud dental.
             </p>
-            {{-- <a href="{{ route('login') }}" class="btn btn-light mt-4">Agendar Cita</a> --}}
         </div>
     </section>
 

@@ -1,1 +1,2 @@
-<h1>Admin</h1>
+@extends('layouts.nav-bar')
+@section('title', 'Admin')

@@ -8,17 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('tratamientos', function (Blueprint $table) {
+        Schema::create('diagnosticos', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('historia_id')
                   ->constrained('historias_clinicas')
                   ->onDelete('cascade');
 
-            $table->date('fecha')->nullable();
-            $table->text('procedimiento')->nullable();
-            $table->text('prescripcion')->nullable();
-            $table->string('firma_profesional', 150)->nullable();
+            $table->string('codigo_cie', 10)->nullable();
+            $table->text('descripcion');
+            $table->string('tipo', 20)->default('presuntivo');
 
             $table->timestamps();
         });
@@ -26,6 +25,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('tratamientos');
+        Schema::dropIfExists('diagnosticos');
     }
 };

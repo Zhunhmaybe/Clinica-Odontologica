@@ -18,16 +18,17 @@ return new class extends Migration
             $table->string('cedula', 10)->unique();
             $table->string('nombres', 100);
             $table->string('apellidos', 100);
+            $table->char('sexo', 1)->nullable();
             $table->string('email')->nullable();
             $table->string('telefono', 10);
             $table->date('fecha_nacimiento');
             $table->text('direccion')->nullable();
-
+            $table->string('ciudad', 100)->nullable();
             $table->boolean('consentimiento_lopdp')->default(false);
             $table->timestamp('fecha_firma_lopdp')->nullable();
             $table->jsonb('datos_dinamicos')->nullable();
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

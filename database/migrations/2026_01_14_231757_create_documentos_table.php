@@ -18,7 +18,12 @@ return new class extends Migration
 
             $table->foreignId('paciente_id')
                 ->constrained('pacientes')
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
+
+            $table->foreignId('historia_id')
+                ->nullable()
+                ->constrained('historias_clinicas')
+                ->nullOnDelete();
 
             $table->foreignId('tratamiento_id')
                 ->nullable()
@@ -28,9 +33,12 @@ return new class extends Migration
             $table->string('tipo', 50);
             $table->string('nombre_archivo', 255);
             $table->string('ruta_archivo', 500);
-            $table->string('cloud_id')->nullable();
+            $table->string('cloud_id', 255)->nullable();
+            $table->bigInteger('tamanio_bytes')->nullable();
+            $table->string('mime_type', 100)->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

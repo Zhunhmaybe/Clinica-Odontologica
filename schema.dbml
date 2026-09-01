@@ -1,0 +1,379 @@
+Table sessions {
+  id character varying(255) [primary key, not null]
+  user_id bigint
+  ip_address character varying(45)
+  user_agent text
+  payload text [not null]
+  last_activity integer [not null]
+}
+
+Table jobs {
+  id bigint [primary key, not null]
+  queue character varying(255) [not null]
+  payload text [not null]
+  attempts smallint [not null]
+  reserved_at integer
+  available_at integer [not null]
+  created_at integer [not null]
+}
+
+Table cache {
+  key character varying(255) [not null]
+  value text [not null]
+  expiration integer [not null]
+}
+
+Table cache_locks {
+  key character varying(255) [not null]
+  owner character varying(255) [not null]
+  expiration integer [not null]
+}
+
+Table odontogramas {
+  id bigint [primary key, not null]
+  historia_id bigint [not null]
+  numero_pieza integer [not null]
+  tipo_denticion character varying(255) [not null]
+  estado character varying(255) [not null]
+  necesita_sellante boolean [not null]
+  movilidad integer
+  recesion integer
+  observaciones text
+  profesional_id bigint [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table job_batches {
+  id character varying(255) [primary key, not null]
+  name character varying(255) [not null]
+  total_jobs integer [not null]
+  pending_jobs integer [not null]
+  failed_jobs integer [not null]
+  failed_job_ids text [not null]
+  options text
+  cancelled_at integer
+  created_at integer [not null]
+  finished_at integer
+}
+
+Table failed_jobs {
+  id bigint [primary key, not null]
+  uuid character varying(255) [not null]
+  connection text [not null]
+  queue text [not null]
+  payload text [not null]
+  exception text [not null]
+  failed_at timestamp without time zone [not null]
+}
+
+Table password_resets {
+  email character varying(255) [not null]
+  token character varying(255) [not null]
+  created_at timestamp without time zone
+}
+
+Table personal_access_tokens {
+  email character varying(255) [not null]
+  token character varying(64) [not null]
+  abilities text
+  last_used_at timestamp without time zone
+  expires_at timestamp without time zone
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table especialidades {
+  id bigint [primary key, not null]
+  nombre character varying(100) [not null]
+  color character varying(20) [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table pacientes {
+  id bigint [primary key, not null]
+  cedula character varying(10) [not null]
+  nombres character varying(100) [not null]
+  apellidos character varying(100) [not null]
+  email character varying(255)
+  telefono character varying(10) [not null]
+  fecha_nacimiento date [not null]
+  direccion text
+  consentimiento_lopdp boolean [not null]
+  fecha_firma_lopdp timestamp without time zone
+  datos_dinamicos jsonb
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table historias_clinicas {
+  id bigint [primary key, not null]
+  paciente_id bigint [not null]
+  numero_historia character varying(50)
+  fecha_atencion date [not null]
+  estado_historia character varying(20) [not null]
+  motivo_consulta text
+  enfermedad_actual text
+  alergias text
+  cardiopatias boolean [not null]
+  diabetes boolean [not null]
+  hipertension boolean [not null]
+  tuberculosis boolean [not null]
+  antecedentes_otros text
+  fam_diabetes boolean [not null]
+  fam_hipertension boolean [not null]
+  fam_cancer boolean [not null]
+  fam_tuberculosis boolean [not null]
+  temperatura numeric
+  presion_arterial character varying(20)
+  pulso integer
+  frecuencia_respiratoria integer
+  labios text
+  lengua text
+  paladar text
+  piso_boca text
+  encias text
+  carrillos text
+  orofaringe text
+  atm text
+  patologias_personales json
+  alergias_lista json
+  patologias_familiares json
+  observaciones text
+  profesional_id bigint
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table usuarios {
+  id bigint [primary key, not null]
+  nombre character varying(100) [not null]
+  tel character varying(10)
+  email character varying(100) [not null]
+  password character varying(255) [not null]
+  estado integer [not null]
+  failed_attempts integer [not null]
+  is_locked integer [not null]
+  lock_code character varying(10)
+  email_verified_at timestamp without time zone
+  two_factor_enabled boolean [not null]
+  two_factor_code character varying(6)
+  two_factor_expires_at timestamp without time zone
+  remember_token character varying(100)
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table indices_salud_bucal {
+  id bigint [primary key, not null]
+  historia_id bigint [not null]
+  cpo_cariados integer [not null]
+  cpo_perdidos integer [not null]
+  cpo_obturados integer [not null]
+  ceo_cariados integer [not null]
+  ceo_extraccion integer [not null]
+  ceo_obturados integer [not null]
+  placa_bacteriana integer [not null]
+  calculo_dental integer [not null]
+  gingivitis integer [not null]
+  nivel_fluorosis character varying(255)
+  tipo_oclusion character varying(255)
+  profesional_id bigint [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table auditoria {
+  id bigint [primary key, not null]
+  usuario_id bigint
+  accion character varying(50) [not null]
+  tabla_afectada character varying(50)
+  registro_id character varying(50)
+  valores_anteriores jsonb
+  valores_nuevos jsonb
+  ip_address character varying(45)
+  user_agent text
+  created_at timestamp without time zone [not null]
+}
+
+Table citas {
+  id bigint [primary key, not null]
+  paciente_id bigint [not null]
+  doctor_id bigint [not null]
+  especialidad_id bigint [not null]
+  fecha_inicio timestamp without time zone [not null]
+  estado character varying(20) [not null]
+  motivo character varying(255)
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table tratamientos {
+  id bigint [primary key, not null]
+  historia_id bigint [not null]
+  fecha date
+  procedimiento text
+  prescripcion text
+  firma_profesional character varying(150)
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table promociones {
+  id bigint [primary key, not null]
+  titulo character varying(255) [not null]
+  descripcion text
+  ruta_imagen character varying(500) [not null]
+  activa boolean [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table documentos {
+  id bigint [primary key, not null]
+  paciente_id bigint [not null]
+  tratamiento_id bigint
+  tipo character varying(50) [not null]
+  nombre_archivo character varying(255) [not null]
+  ruta_archivo character varying(500) [not null]
+  cloud_id character varying(255)
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table campos_formularios {
+  id bigint [primary key, not null]
+  tipo_formulario character varying(50) [not null]
+  etiqueta character varying(255) [not null]
+  tipo_dato character varying(50) [not null]
+  es_requerido boolean [not null]
+  orden integer [not null]
+  activo boolean [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table diagnosticos {
+  id bigint [primary key, not null]
+  historia_id bigint [not null]
+  descripcion text [not null]
+  tipo character varying(255) [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table examenes_complementarios {
+  id bigint [primary key, not null]
+  historia_id bigint [not null]
+  tipo_examen character varying(255) [not null]
+  nombre_examen character varying(255) [not null]
+  descripcion text
+  fecha_solicitud date [not null]
+  fecha_resultado date
+  resultados text
+  archivo_resultado character varying(255)
+  estado character varying(255) [not null]
+  profesional_solicita bigint
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table consentimientos_informados {
+  id bigint [primary key, not null]
+  paciente_id bigint [not null]
+  historia_id bigint
+  tratamiento_id bigint
+  tipo_consentimiento character varying(255) [not null]
+  propositos text
+  procedimientos_propuestos text
+  resultados_esperados text
+  riesgos_complicaciones text
+  intervenciones_quirurgicas text
+  riesgos_quirurgicos text
+  anestesia_propuesta character varying(255)
+  riesgos_anestesicos text
+  nombre_anestesiologo character varying(255)
+  informacion_satisfactoria boolean [not null]
+  actividades_explicadas boolean [not null]
+  beneficios_riesgos_comprendidos boolean [not null]
+  garantia_calidad_comprendida boolean [not null]
+  respeto_intimidad_garantizado boolean [not null]
+  derecho_anular_comprendido boolean [not null]
+  informacion_completa_entregada boolean [not null]
+  firma_paciente character varying(255)
+  cedula_paciente character varying(10) [not null]
+  fecha_firma_paciente timestamp without time zone
+  nombre_representante character varying(255)
+  cedula_representante character varying(10)
+  parentesco_representante character varying(255)
+  firma_representante character varying(255)
+  fecha_firma_representante timestamp without time zone
+  nombre_testigo character varying(255)
+  cedula_testigo character varying(10)
+  firma_testigo character varying(255)
+  profesional_id bigint [not null]
+  firma_profesional character varying(255)
+  fecha_firma_profesional timestamp without time zone
+  documento_pdf character varying(255)
+  estado character varying(255) [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table permissions {
+  id bigint [primary key, not null]
+  name character varying(255) [not null]
+  guard_name character varying(255) [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table model_has_permissions {
+  permission_id bigint [not null]
+  model_type character varying(255) [not null]
+  model_id bigint [not null]
+}
+
+Table model_has_roles {
+  role_id bigint [not null]
+  model_type character varying(255) [not null]
+  model_id bigint [not null]
+}
+
+Table roles {
+  id bigint [primary key, not null]
+  name character varying(255) [not null]
+  guard_name character varying(255) [not null]
+  created_at timestamp without time zone
+  updated_at timestamp without time zone
+}
+
+Table role_has_permissions {
+  permission_id bigint [not null]
+  role_id bigint [not null]
+}
+
+Ref: historias_clinicas.paciente_id > pacientes.id
+Ref: odontogramas.historia_id > historias_clinicas.id
+Ref: odontogramas.profesional_id > usuarios.id
+Ref: indices_salud_bucal.historia_id > historias_clinicas.id
+Ref: indices_salud_bucal.profesional_id > usuarios.id
+Ref: citas.paciente_id > pacientes.id
+Ref: citas.doctor_id > usuarios.id
+Ref: citas.especialidad_id > especialidades.id
+Ref: tratamientos.historia_id > historias_clinicas.id
+Ref: documentos.paciente_id > pacientes.id
+Ref: documentos.tratamiento_id > tratamientos.id
+Ref: auditoria.usuario_id > usuarios.id
+Ref: diagnosticos.historia_id > historias_clinicas.id
+Ref: examenes_complementarios.historia_id > historias_clinicas.id
+Ref: examenes_complementarios.profesional_solicita > usuarios.id
+Ref: consentimientos_informados.paciente_id > pacientes.id
+Ref: consentimientos_informados.historia_id > historias_clinicas.id
+Ref: consentimientos_informados.tratamiento_id > tratamientos.id
+Ref: consentimientos_informados.profesional_id > usuarios.id
+Ref: model_has_permissions.permission_id > permissions.id
+Ref: model_has_roles.role_id > roles.id
+Ref: role_has_permissions.permission_id > permissions.id
+Ref: role_has_permissions.role_id > roles.id

@@ -12,17 +12,23 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg bg-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-navbar">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="/images/logo-danny.png" alt="Logo Danny">
+                <img src="/images/logo-danny.png" alt="Logo Danny" style="max-height: 50px;" class="img-fluid">
                 <span class="ms-2 fw-bold text-white">Consultorio Danny</span>
             </a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li><a class="nav-link text-white" href="{{ route('login') }}">Ingresar</a></li>
-                    <li><a class="nav-link text-white" href="{{ route('servicios')}}">Servicios</a></li>
-                    <li><a class="nav-link text-white" href="{{ route('contacto')}}">Contactanos</a></li>
+            
+            <!-- Botón Hamburguesa para Móviles -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto text-center mt-3 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ route('login') }}">Ingresar</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ route('servicios')}}">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ route('contacto')}}">Contactanos</a></li>
                 </ul>
             </div>
         </div>
@@ -32,13 +38,16 @@
         @yield('content')
     </main>
 
-    <footer class="text-center mt-auto">
+    <footer class="text-center mt-auto py-3">
         <div class="container">
-            <p class="mb-0">
+            <p class="mb-0 text-white">
                 © 2025 Consultorio Odontológico Danny | Cuidando sonrisas
             </p>
         </div>
     </footer>
+
+    <!-- Scripts necesarios para Bootstrap Responsive Navbar -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

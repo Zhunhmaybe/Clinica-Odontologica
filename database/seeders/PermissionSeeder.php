@@ -45,6 +45,7 @@ class PermissionSeeder extends Seeder
                 'ver-Perfil',
             ]);
         }
+
         /** @var \Spatie\Permission\Models\Role $rolrecepcionista */
         $rolrecepcionista= Role::where('name','recepcionista')->first();
         if($rolrecepcionista){
@@ -52,7 +53,44 @@ class PermissionSeeder extends Seeder
                 'ver-Perfil',
                 'editar-Perfil',
                 '2FA',
-                'ver-citas1',
+                'ver-citas',
+                'ver-pacientes'
+            ]);
+        }
+
+        /** @var \Spatie\Permission\Models\Role $rolauditor */
+        $rolauditor = Role::where('name','auditor')->first();
+        if($rolauditor){
+            $rolauditor->givePermissionTo([
+                'ver-Perfil',
+                'editar-Perfil',
+                '2FA',
+                'ver-citas',
+                'ver-pacientes'
+            ]);
+        }
+
+        /** @var \Spatie\Permission\Models\Role $roladmin */
+        $roladmin = Role::where('name','admin')->first();
+        if($roladmin){
+            $roladmin->givePermissionTo([
+                'ver-Perfil',
+                'editar-Perfil',
+                '2FA',
+                'ver-citas',
+                'ver-pacientes'
+            ]);
+        }
+
+        /** @var \Spatie\Permission\Models\Role $roldoctor */
+        $roldoctor = Role::where('name','doctor')->first();
+        if($roldoctor){
+            $roldoctor->givePermissionTo([
+                'ver-Perfil',
+                'editar-Perfil',
+                '2FA',
+                'ver-citas',
+                'ver-pacientes'
             ]);
         }
 

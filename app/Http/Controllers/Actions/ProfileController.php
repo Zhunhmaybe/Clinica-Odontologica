@@ -8,6 +8,40 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
+    //Perfil
+    public function showProfile()
+    {
+        $user = Auth::user();
+        return view('components.perfil.index', compact('user'));
+    }
+    public function editProfile()
+    {
+        $user = Auth::user();
+        return view('components.perfil.edit', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $antes = $user->toArray();
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'email'  => 'required|email|max:100|unique:usuarios,email,' . $user->id,
+            'tel'    => 'nullable|string|max:10',
+        ]);
+
+        $user->update([
+            'nombre' => $request->nombre,
+            'email'  => $request->email,
+            'tel'    => $request->tel,
+        ]);
+
+        return redirect()
+            ->route('perfil.index')
+            ->with('success', 'Perfil actualizado correctamente');
+    }
+
     public function show2FA()
     {
         $role = Auth::user()->rol;

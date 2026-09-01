@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('tipo_formulario', 50);
             $table->string('etiqueta', 255);
             $table->string('tipo_dato', 50);
+            $table->jsonb('opciones')->nullable();
             $table->boolean('es_requerido')->default(false);
             $table->integer('orden')->default(0);
             $table->boolean('activo')->default(true);

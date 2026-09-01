@@ -1,1 +1,2 @@
-<h1>Doctor</h1>
+@extends('layouts.nav-bar')
+@section('title', 'Doctor')

@@ -1,1 +1,2 @@
-<h1>Auditor</h1>
+@extends('layouts.nav-bar')
+@section('title', 'Auditor')

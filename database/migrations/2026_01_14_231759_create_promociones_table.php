@@ -19,6 +19,8 @@ return new class extends Migration
             $table->text('descripcion')->nullable();
             $table->string('ruta_imagen', 500);
             $table->boolean('activa')->default(true);
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
             $table->timestamps();
         });
     }

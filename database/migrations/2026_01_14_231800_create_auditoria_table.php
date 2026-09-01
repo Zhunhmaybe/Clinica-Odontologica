@@ -22,7 +22,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->string('accion', 50);
-            $table->string('tabla_afectada', 50)->nullable();
+            $table->string('tabla_afectada', 100)->nullable();
             $table->string('registro_id', 50)->nullable();
             $table->jsonb('valores_anteriores')->nullable();
             $table->jsonb('valores_nuevos')->nullable();

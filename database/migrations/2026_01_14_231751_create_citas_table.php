@@ -18,21 +18,24 @@ return new class extends Migration
 
             $table->foreignId('paciente_id')
                 ->constrained('pacientes')
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
             $table->foreignId('doctor_id')
                 ->constrained('usuarios')
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
             $table->foreignId('especialidad_id')
                 ->constrained('especialidades')
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
             $table->timestamp('fecha_inicio');
+            $table->timestamp('fecha_fin')->nullable();
             $table->string('estado', 20)->default('pendiente');
-            $table->string('motivo', 255)->nullable();
+            $table->string('motivo', 500)->nullable();
+            $table->text('notas_internas')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -21,39 +21,29 @@ return new class extends Migration
                   ->constrained('historias_clinicas')
                   ->onDelete('cascade');
 
-            // Tipo de examen
-            $table->enum('tipo_examen', [
-                'radiografia_periapical',
-                'radiografia_panoramica',
-                'radiografia_oclusal',
-                'biometria_hematica',
-                'glucosa',
-                'laboratorio_clinico',
-                'biopsia',
-                'interconsulta',
-                'otro'
-            ]);
-
-            // Detalles del examen
-            $table->string('nombre_examen');
-            $table->text('descripcion')->nullable();
-            
-            // Fechas
-            $table->date('fecha_solicitud');
-            $table->date('fecha_resultado')->nullable();
-
-            // Resultados
-            $table->text('resultados')->nullable();
-            $table->string('archivo_resultado')->nullable()->comment('Ruta al archivo PDF/imagen del resultado');
-
-            // Estado
-            $table->enum('estado', ['solicitado', 'en_proceso', 'completado', 'cancelado'])->default('solicitado');
-
             // Auditoría
             $table->foreignId('profesional_solicita')
                   ->nullable()
                   ->constrained('usuarios')
                   ->nullOnDelete();
+
+            // Tipo de examen
+            $table->string('tipo_examen', 50);
+
+            // Detalles del examen
+            $table->string('nombre_examen', 255);
+            $table->text('descripcion')->nullable();
+            
+            // Fechas
+            $table->date('fecha_solicitud')->default(now());
+            $table->date('fecha_resultado')->nullable();
+
+            // Resultados
+            $table->text('resultados')->nullable();
+            $table->string('archivo_resultado', 500)->nullable();
+
+            // Estado
+            $table->string('estado', 20)->default('solicitado');
 
             $table->timestamps();
         });
