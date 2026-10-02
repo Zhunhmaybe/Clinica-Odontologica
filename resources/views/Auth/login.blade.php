@@ -44,12 +44,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                        required>
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <x-password-input 
+                        name="password" 
+                        label="Contraseña" 
+                        required 
+                    />
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mb-4">

@@ -141,8 +141,7 @@ class PacientesController extends Controller
 
     public function pacientesHistoria(Paciente $paciente)
     {
-        // Método de placeholder para cuando lo implementes
-        return back()->with('success', 'Historial clínico en desarrollo...');
+        return redirect()->route('historia_clinica.index', ['paciente_id' => $paciente->id]);
     }
 
 }

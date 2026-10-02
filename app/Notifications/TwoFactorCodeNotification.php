@@ -30,7 +30,7 @@ class TwoFactorCodeNotification extends Notification
             ->line('Has solicitado iniciar sesión en tu cuenta.')
             ->line('Tu código de verificación es:')
             ->line('**' . $this->code . '**')
-            ->line('Este código expirará en 10 minutos.')
+            ->line('Este código expirará en 5 minutos.')
             ->line('Si no fuiste tú, ignora este mensaje.')
             ->line('¡Gracias por mantener tu cuenta segura!');
     }

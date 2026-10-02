@@ -1,0 +1,658 @@
+/**
+ * Historia Clínica + Odontograma - CSS Unificado
+ * Proyecto: paginaClinica
+ */
+
+/* ========== VARIABLES ========== */
+:root {
+    --hc-primary: #5b7c99;
+    --hc-primary-light: #7ba3c4;
+    --hc-info: #4a90a4;
+    --hc-info-light: #6fb8cc;
+    --hc-warning: #c49a6c;
+    --hc-warning-light: #d4b896;
+    --hc-success: #5a9e7c;
+    --hc-success-light: #7cc4a0;
+    --hc-secondary: #6c757d;
+    --hc-secondary-light: #8e959c;
+    --hc-dark: #343a40;
+    --hc-dark-light: #555e66;
+    --hc-danger: #8e5d6f;
+    --hc-danger-light: #a57484;
+    --hc-treatment: #5a8e7c;
+    --hc-glass-bg: rgba(255, 255, 255, 0.7);
+    --hc-glass-border: rgba(255, 255, 255, 0.3);
+    --hc-glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+    --hc-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== HEADER BANNER ========== */
+.hc-header-banner {
+    background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: white;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(91, 124, 153, 0.3);
+}
+
+.hc-header-banner h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.hc-header-banner h2 i {
+    margin-right: 10px;
+}
+
+/* ========== STEPPER (create.blade.php) ========== */
+.hc-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.hc-stepper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 3px;
+    background: #e9ecef;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.hc-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    transition: var(--hc-transition);
+}
+
+.hc-step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    transition: var(--hc-transition);
+    border: 3px solid transparent;
+}
+
+.hc-step.active .hc-step-number {
+    background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%);
+    color: white;
+    border-color: rgba(91, 124, 153, 0.3);
+    box-shadow: 0 4px 15px rgba(91, 124, 153, 0.4);
+    transform: scale(1.1);
+}
+
+.hc-step.completed .hc-step-number {
+    background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%);
+    color: white;
+}
+
+.hc-step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #adb5bd;
+    margin-top: 8px;
+    text-align: center;
+    max-width: 80px;
+    transition: var(--hc-transition);
+}
+
+.hc-step.active .hc-step-label,
+.hc-step.completed .hc-step-label {
+    color: var(--hc-primary);
+}
+
+.hc-step-content {
+    display: none;
+    animation: hcFadeIn 0.4s ease;
+}
+
+.hc-step-content.active {
+    display: block;
+}
+
+@keyframes hcFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== CARD SECTIONS (formulario) ========== */
+.hc-card {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 20px;
+    transition: var(--hc-transition);
+}
+
+.hc-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hc-card-header {
+    padding: 18px 24px;
+    font-weight: 700;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hc-card-header.section-a { background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%); }
+.hc-card-header.section-b { background: linear-gradient(135deg, var(--hc-info) 0%, var(--hc-info-light) 100%); }
+.hc-card-header.section-d { background: linear-gradient(135deg, var(--hc-warning) 0%, var(--hc-warning-light) 100%); }
+.hc-card-header.section-f { background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%); }
+.hc-card-header.section-g { background: linear-gradient(135deg, var(--hc-secondary) 0%, var(--hc-secondary-light) 100%); }
+.hc-card-header.section-obs { background: linear-gradient(135deg, var(--hc-dark) 0%, var(--hc-dark-light) 100%); }
+.hc-card-header.section-diag { background: linear-gradient(135deg, var(--hc-danger) 0%, var(--hc-danger-light) 100%); }
+.hc-card-header.section-treat { background: linear-gradient(135deg, var(--hc-treatment) 0%, #7aa58f 100%); }
+
+.hc-card .card-body {
+    padding: 24px;
+}
+
+/* ========== GLASSMORPHISM CARDS (show.blade.php) ========== */
+.hc-glass-card {
+    background: var(--hc-glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--hc-glass-border);
+    border-radius: 16px;
+    box-shadow: var(--hc-glass-shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: var(--hc-transition);
+}
+
+.hc-glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.18);
+}
+
+/* ========== INFO BOXES ========== */
+.hc-info-box {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: var(--hc-transition);
+    margin-bottom: 12px;
+}
+
+.hc-info-box:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hc-info-box-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.hc-info-box-icon.icon-primary { background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%); }
+.hc-info-box-icon.icon-info { background: linear-gradient(135deg, var(--hc-info) 0%, var(--hc-info-light) 100%); }
+.hc-info-box-icon.icon-success { background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%); }
+.hc-info-box-icon.icon-warning { background: linear-gradient(135deg, var(--hc-warning) 0%, var(--hc-warning-light) 100%); }
+.hc-info-box-icon.icon-danger { background: linear-gradient(135deg, var(--hc-danger) 0%, var(--hc-danger-light) 100%); }
+
+.hc-info-box-content small {
+    display: block;
+    color: #6c757d;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.hc-info-box-content strong {
+    font-size: 16px;
+    color: #2d3748;
+}
+
+/* ========== VITAL STATS ========== */
+.hc-vital-stat {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 14px;
+    transition: var(--hc-transition);
+}
+
+.hc-vital-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hc-vital-stat i {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.hc-vital-stat .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.hc-vital-stat .label {
+    font-size: 11px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+}
+
+/* ========== TREATMENT ITEMS ========== */
+.hc-treatment-item {
+    background: white;
+    border-left: 4px solid var(--hc-treatment);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: var(--hc-transition);
+}
+
+.hc-treatment-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hc-treatment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.hc-treatment-header h6 {
+    margin: 0;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+/* ========== PATOLOGÍA BADGES ========== */
+.hc-patologia-badge {
+    background: linear-gradient(135deg, var(--hc-danger) 0%, var(--hc-danger-light) 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 3px;
+    font-weight: 600;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(142, 93, 111, 0.3);
+}
+
+/* ========== GRADIENT BUTTONS ========== */
+.hc-btn-action {
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: var(--hc-transition);
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hc-btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.hc-btn-primary { background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%); color: white; }
+.hc-btn-primary:hover { color: white; }
+.hc-btn-danger { background: linear-gradient(135deg, var(--hc-danger) 0%, var(--hc-danger-light) 100%); color: white; }
+.hc-btn-danger:hover { color: white; }
+.hc-btn-warning { background: linear-gradient(135deg, var(--hc-warning) 0%, var(--hc-warning-light) 100%); color: white; }
+.hc-btn-warning:hover { color: white; }
+.hc-btn-success { background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%); color: white; }
+.hc-btn-success:hover { color: white; }
+
+/* ========== INDEX TABLE ========== */
+.hc-table thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.hc-table thead th {
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 14px 16px;
+    color: #495057;
+}
+
+.hc-table tbody tr {
+    transition: var(--hc-transition);
+}
+
+.hc-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.hc-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: middle;
+}
+
+.hc-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%);
+    flex-shrink: 0;
+}
+
+.hc-badge-abierta {
+    background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.hc-badge-cerrada {
+    background: linear-gradient(135deg, var(--hc-secondary) 0%, var(--hc-secondary-light) 100%);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* ========== SEARCH BOX ========== */
+.hc-search-box {
+    position: relative;
+}
+
+.hc-search-box .form-control {
+    padding-left: 40px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: var(--hc-transition);
+}
+
+.hc-search-box .form-control:focus {
+    border-color: var(--hc-primary);
+    box-shadow: 0 0 0 3px rgba(91, 124, 153, 0.15);
+}
+
+.hc-search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+}
+
+/* ========== ODONTOGRAMA ========== */
+.odontograma-wrapper {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.diente-container {
+    display: inline-block;
+    margin: 2px;
+    text-align: center;
+    position: relative;
+}
+
+.diente-svg {
+    cursor: pointer;
+    transition: transform 0.2s;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.diente-svg:hover {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.numero-pieza {
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.diente-svg polygon,
+.diente-svg rect,
+.diente-svg path,
+.diente-svg circle {
+    transition: fill 0.3s ease;
+}
+
+.diente-svg polygon:hover,
+.diente-svg rect:hover,
+.diente-svg path:hover,
+.diente-svg circle:hover {
+    opacity: 0.7;
+}
+
+/* Caras checkbox modal */
+.cara-checkbox:checked + .btn-cara {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.btn-cara {
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+/* Tooltip para dientes */
+.diente-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.diente-container:hover .diente-tooltip {
+    opacity: 1;
+}
+
+.diente-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.85);
+}
+
+/* Índices de Salud Bucal */
+.hc-indices-container {
+    background: #ffffff;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.hc-indices-container h5 {
+    border-bottom: 2px solid var(--hc-primary);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.hc-indice-grupo {
+    background: #f8f9fa;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.hc-indice-grupo label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 13px;
+}
+
+/* ========== TOAST NOTIFICATIONS ========== */
+.hc-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.hc-toast {
+    padding: 14px 22px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: hcSlideIn 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hc-toast.success {
+    background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%);
+}
+
+.hc-toast.error {
+    background: linear-gradient(135deg, #dc3545 0%, #e77681 100%);
+}
+
+@keyframes hcSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ========== FORMS ========== */
+.hc-form-label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #4a5568;
+    font-size: 13px;
+}
+
+.hc-form-control,
+.hc-form-select {
+    border-radius: 8px;
+    border: 1.5px solid #d1d5db;
+    padding: 9px 14px;
+    transition: var(--hc-transition);
+}
+
+.hc-form-control:focus,
+.hc-form-select:focus {
+    border-color: var(--hc-primary);
+    box-shadow: 0 0 0 3px rgba(91, 124, 153, 0.15);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .hc-header-banner {
+        padding: 18px;
+    }
+
+    .hc-header-banner h2 {
+        font-size: 18px;
+    }
+
+    .hc-stepper {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .hc-stepper::before {
+        display: none;
+    }
+
+    .hc-step-label {
+        display: none;
+    }
+
+    .hc-info-box {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .diente-container {
+        margin: 1px;
+    }
+
+    .diente-svg {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .numero-pieza {
+        font-size: 9px;
+    }
+}

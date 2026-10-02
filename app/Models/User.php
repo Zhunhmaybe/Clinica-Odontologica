@@ -69,6 +69,11 @@ class User extends Authenticatable
     {
         return $this->hasRole('usuario');
     }
+
+    public function esSuperAdmin(): bool
+    {
+        return $this->hasRole('Super_admin');
+    }
     //----------------------------------------------------------------
     // Obtener nombre del estado
     public function getNombreRolAttribute(): string
@@ -80,6 +85,7 @@ class User extends Authenticatable
         }
 
         return match ($role->name) {
+            'Super_admin' => 'Súper Administrador',
             'doctor' => 'Doctor',
             'admin' => 'Administrador',
             'auditor' => 'Auditor',
@@ -103,6 +109,7 @@ class User extends Authenticatable
             'auditor' => 2,
             'recepcionista' => 3,
             'usuario' => 4,
+            'Super_admin' => 5, 
             default => null,
         };
     }
@@ -124,10 +131,10 @@ class User extends Authenticatable
     // Métodos para 2FA
     public function generateTwoFactorCode(): string
     {
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $this->two_factor_code = $code;
-        $this->two_factor_expires_at = Carbon::now()->addMinutes(10);
+        $this->two_factor_expires_at = Carbon::now()->addMinutes(5);
         $this->save();
 
         return $code;
@@ -140,41 +147,98 @@ class User extends Authenticatable
         $this->save();
     }
 
+    public function hasValidTwoFactorCode(): bool
+    {
+        if (empty($this->two_factor_code) || empty($this->two_factor_expires_at)) {
+            return false;
+        }
+
+        $expiresAt = is_string($this->two_factor_expires_at)
+            ? Carbon::parse($this->two_factor_expires_at)
+            : $this->two_factor_expires_at;
+
+        return Carbon::now()->lt($expiresAt);
+    }
+
+    public function getTwoFactorRemainingSeconds(): int
+    {
+        if (!$this->hasValidTwoFactorCode()) {
+            return 0;
+        }
+
+        $expiresAt = is_string($this->two_factor_expires_at)
+            ? Carbon::parse($this->two_factor_expires_at)
+            : $this->two_factor_expires_at;
+
+        return max(0, (int) Carbon::now()->diffInSeconds($expiresAt, false));
+    }
+
     public function validateTwoFactorCode($code): bool
     {
-        if (!$this->two_factor_code || !$this->two_factor_expires_at) {
+        if (!$this->hasValidTwoFactorCode()) {
             return false;
         }
 
-        if (Carbon::now()->gt($this->two_factor_expires_at)) {
-            return false;
-        }
-
-        return $this->two_factor_code === $code;
+        return (string) $this->two_factor_code === trim((string) $code);
     }
 
-    //relaciones-----------------------------------------------------
-    /*
-    public function historiasClinics()
-    {
-        return $this->hasMany(\App\Models\HistoriaClinica::class, 'profesional_id');
-    }
-
-
-    public function citas()
-    {
-        return $this->hasMany(\App\Models\Cita::class, 'doctor_id');
-    }
-
-
-    public function consentimientos()
-    {
-        return $this->hasMany(\App\Models\ConsentimientoInformado::class, 'profesional_id');
-    }
-
-    public function auditLogs()
+    public function auditorias()
     {
         return $this->hasMany(\App\Models\Auditoria::class, 'usuario_id');
     }
-    */
+
+    /**
+     * Verifica si existe una sesión previa confiable para este usuario
+     * con la misma IP y navegador/dispositivo en la tabla 'sessions'.
+     */
+    public function hasTrustedSession(\Illuminate\Http\Request $request): bool
+    {
+        $ip = $request->ip();
+        $ua = $request->userAgent();
+
+        if (empty($ip) || empty($ua)) {
+            return false;
+        }
+
+        // Verifica si en la tabla 'sessions' existe un registro previo de este usuario
+        // con la misma IP y User Agent dentro de los últimos 30 días
+        $limitTimestamp = Carbon::now()->subDays(30)->timestamp;
+
+        return \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $this->id)
+            ->where('ip_address', $ip)
+            ->where('user_agent', $ua)
+            ->where('last_activity', '>=', $limitTimestamp)
+            ->exists();
+    }
+
+    /**
+     * Actualiza o registra los detalles de la sesión actual en la tabla 'sessions'.
+     */
+    public function recordSessionDetails(\Illuminate\Http\Request $request): void
+    {
+        $sessionId = $request->session()->getId();
+        if ($sessionId) {
+            \Illuminate\Support\Facades\DB::table('sessions')
+                ->where('id', $sessionId)
+                ->update([
+                    'user_id'       => $this->id,
+                    'ip_address'    => $request->ip(),
+                    'user_agent'    => $request->userAgent(),
+                    'dispositivo'   => \App\Services\DeviceDetector::getDevice($request->userAgent()),
+                    'ubicacion'     => \App\Services\DeviceDetector::getLocation($request->ip()),
+                    'last_activity' => time(),
+                ]);
+        }
+    }
+
+    /**
+     * Elimina las sesiones del usuario en la tabla 'sessions'.
+     */
+    public function clearSessions(): void
+    {
+        \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $this->id)
+            ->delete();
+    }
 }

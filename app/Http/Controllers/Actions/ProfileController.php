@@ -44,15 +44,7 @@ class ProfileController extends Controller
 
     public function show2FA()
     {
-        $role = Auth::user()->rol;
-
-        return match ($role) {
-            'doctor' => view('doctor.2fa'),
-            'admin' => view('admin.2fa'),
-            'auditor' => view('auditor.2fa'),
-            'recepcionista' => view('recepcionista.2fa'),
-            default => redirect()->back()
-        };
+        return redirect()->route('perfil.index');
     }
 
     public function enable2FA(Request $request)
@@ -61,13 +53,13 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if ($user->two_factor_enabled) {
-            return redirect()->back()->with('error', 'La autenticación de dos factores ya está habilitada.');
+            return redirect()->route('perfil.index')->with('info', 'La autenticación de dos factores ya se encuentra activada.');
         }
 
         $user->two_factor_enabled = true;
         $user->save();
 
-        return redirect()->back()->with('success', '¡Autenticación de dos factores habilitada! Se solicitará un código en tu próximo inicio de sesión.');
+        return redirect()->route('perfil.index')->with('success', '¡Autenticación de dos factores  activada correctamente');
     }
 
     public function disable2FA(Request $request)
@@ -76,13 +68,25 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if (!$user->two_factor_enabled) {
-            return redirect()->back()->with('error', 'La autenticación de dos factores no está habilitada.');
+            return redirect()->route('perfil.index')->with('info', 'La autenticación de dos factores ya se encuentra desactivada.');
         }
 
         $user->two_factor_enabled = false;
         $user->resetTwoFactorCode();
+        $user->clearSessions();
         $user->save();
 
-        return redirect()->back()->with('success', 'Autenticación de dos factores deshabilitada.');
+        return redirect()->route('perfil.index')
+            ->with('success', 'Autenticación de dos factores (2FA) desactivada correctamente.');
+    }
+
+    public function forgetDevices(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->clearSessions();
+
+        return redirect()->route('perfil.index')
+            ->with('success', 'Sesiones y dispositivos recordados eliminados de la base de datos.');
     }
 }

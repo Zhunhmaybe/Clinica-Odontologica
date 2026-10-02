@@ -11,30 +11,43 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
     public function showLoginForm()
     {
+        session()->forget(['2fa:user:id', '2fa:remember']);
         return view('auth.login');
     }
     public function unlockForm()
     {
         return view('auth.unlock');
     }
+
     public function showTwoFactorForm(Request $request)
     {
         if (!$request->session()->has('2fa:user:id')) {
             return redirect()->route('login');
         }
 
-        return view('auth.two-factor');
+        $userId = $request->session()->get('2fa:user:id');
+        $user = User::find($userId);
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $remainingSeconds = $user->getTwoFactorRemainingSeconds();
+
+        return view('auth.two-factor', compact('user', 'remainingSeconds'));
     }
+
     public function login(Request $request)
     {
 
@@ -124,23 +137,74 @@ class AuthController extends Controller
         // PASO 8: VERIFICAR 2FA
         if ($user->two_factor_enabled) {
 
-            $code = $user->generateTwoFactorCode();
+            // Si existe una sesión previa confiable para este usuario con la misma IP y dispositivo en 'sessions'
+            if ($user->hasTrustedSession($request)) {
+                Auth::login($user, $request->filled('remember'));
+                $request->session()->regenerate();
+                $user->recordSessionDetails($request);
 
-            try {
-                $user->notify(new TwoFactorCodeNotification($code));
-            } catch (\Exception $e) {
-                Log::error('Error al enviar código 2FA: ' . $e->getMessage());
+                \App\Models\Auditoria::registrar(
+                    accion: 'Inicio de sesión (2FA omitido - Sesión y dispositivo reconocido en tabla sessions)',
+                    usuarioId: $user->id,
+                    tabla: 'usuarios',
+                    registroId: (string) $user->id,
+                    request: $request
+                );
+
+                try {
+                    $loginTime = Carbon::now()->format('d/m/Y H:i:s');
+                    $ipAddress = $request->ip();
+                    $user->notify(new LoginNotification($loginTime, $ipAddress));
+                } catch (\Exception $e) {
+                    Log::error('Error al enviar notificación de login: ' . $e->getMessage());
+                }
+
+                return $this->redirectByRole($user);
             }
 
             $request->session()->put('2fa:user:id', $user->id);
             $request->session()->put('2fa:remember', $request->filled('remember'));
 
-            return redirect()->route('2fa.verify');
+            // Validar si ya tiene un código vigente (menos de 5 minutos)
+            if ($user->hasValidTwoFactorCode()) {
+                return redirect()->route('2fa.verify')
+                    ->with('info', 'El codigo ya ha sido enviado a su correo introdusca el codigo');
+            }
+
+            // Generar nuevo código de 6 dígitos válido por 5 minutos
+            $code = $user->generateTwoFactorCode();
+
+            try {
+                $user->notify(new TwoFactorCodeNotification($code));
+                $message = 'Hemos enviado un código de verificación a su correo electrónico.';
+            } catch (\Exception $e) {
+                Log::error('Error al enviar código 2FA: ' . $e->getMessage());
+                $message = 'Código generado, pero ocurrió un problema al enviar el correo. Verifique la configuración de correo.';
+            }
+
+            \App\Models\Auditoria::registrar(
+                accion: 'Solicitud de código 2FA',
+                usuarioId: $user->id,
+                tabla: 'usuarios',
+                registroId: (string) $user->id,
+                request: $request
+            );
+
+            return redirect()->route('2fa.verify')->with('status', $message);
         }
 
         // PASO 9: LOGIN EXITOSO
         Auth::login($user, $request->filled('remember'));
         $request->session()->regenerate();
+        $user->recordSessionDetails($request);
+
+        \App\Models\Auditoria::registrar(
+            accion: 'Inicio de sesión exitoso',
+            usuarioId: $user->id,
+            tabla: 'usuarios',
+            registroId: (string) $user->id,
+            request: $request
+        );
 
         // PASO 10: ENVIAR NOTIFICACIÓN
         try {
@@ -179,17 +243,66 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:100',
-            'email' => 'required|string|unique:usuarios',
-            'password' => 'required|string|confirmed',
+            //=> operador de doble flecha sirve para asignar una clave a un valor dentro de un arreglo en php
+            // regex:/^[\pL\s]+$/u  regex es un patron de busqueda de texto 
+            //^  comienzo de la cadena
+            // $  fin de la cadena
+            // +  una o mas veces
+            //  \s  espacios en blanco
+            // \pL  cualquier tipo de letra (considera acentos, ñ, etc.)
+            // u  flag que indica que se esta utilizando unicode
+            // i  flag que indica que se esta utilizando case insensitive
+            //ejemplo de expresion regular: /^[a-zA-Z0-9._%+-]+@gmail\.com$/i
+            //explicacion: 
+            // ^[a-zA-Z0-9._%+-]+   debe iniciar con una letra, numero, punto, guion bajo, porcentaje, mas o menos
+            // @   debe tener un arroba
+            // gmail\.com   debe tener gmail.com
+            // $   debe terminar con gmail.com
+            // i   case insensitive
+            // .\  es un escape de escape para que se considere el punto como un caracter literal
+
+            'nombre' => ['required','string','max:70','regex:/^[\pL\s]+$/u'],
+            'email' => ['required','string','email','max:100','regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/i','unique:usuarios'], 
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(5) // Mínimo 8 caracteres
+                    ->letters()  // Debe contener al menos una letra
+                    ->mixedCase() // Debe contener al menos una mayúscula y una minúscula
+                    ->numbers()   // Debe contener al menos un número
+                    ->symbols()   // Debe contener al menos un símbolo especial (@, $, #, etc.)
+            ],
+
+        ],
+        [
+            //mensajes amigables con el usuario
+            'nombre.required' => 'El nombre es obligatorio',
+            'nombre.string' => 'El nombre debe ser texto',
+            'nombre.max' => 'Se excede el numero de caracteres para el nombre',
+            'nombre.regex' => 'El nombre debe contener solo letras',
+            'email.required' => 'El correo es obligatorio',
+            'email.string' => 'El correo debe ser texto',
+            'email.email' => 'El correo debe ser un correo valido',
+            'email.max' => 'El correo debe tener maximo 100 caracteres',
+            'email.regex' => 'El correo debe ser de extensión @gmail.com',
+            'email.unique' => 'El correo ya esta registrado',
+            'password.required' => 'La contraseña es obligatoria',
+            'password.string' => 'La contraseña debe ser texto',
+            'password.confirmed' => 'La contraseña no coincide',
+            'password.min' => 'La contraseña debe tener minimo 5 caracteres',
+            'password.letters' => 'La contraseña debe contener al menos una letra',
+            'password.mixed' => 'La contraseña debe contener al menos una mayuscula y una minuscula',
+            'password.numbers' => 'La contraseña debe contener al menos un numero',
+            'password.symbols' => 'La contraseña debe contener al menos un simbolo',
         ]);
+
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
-            DB::select("SELECT validar_fuerza_password(?)", [$request->password]);
             $user = User::create([
                 'nombre' => $request->nombre,
                 'tel' => $request->tel ?? null,
@@ -200,26 +313,19 @@ class AuthController extends Controller
             $user->assignRole('usuario');
 
             return redirect()->route('login')->with('success', 'Registro completado. Por favor ingresa tus credenciales para iniciar sesión.');
-        } catch (QueryException $e) {
-            $errorMessage = $e->errorInfo[2] ?? 'Error en base de datos';
-            if (str_contains($errorMessage, 'PL/pgSQL: La contraseña')) {
-                $msg = explode('PL/pgSQL:', $errorMessage)[1] ?? 'Contraseña inválida';
-                $msg = explode("\n", $msg)[0];
-                return back()->withErrors(['password' => trim($msg)])->withInput();
-            }
-            if (str_contains($errorMessage, 'PL/pgSQL: El correo')) {
-                $msg = explode('PL/pgSQL:', $errorMessage)[1] ?? 'Email inválido';
-                $msg = explode("\n", $msg)[0];
-                return back()->withErrors(['email' => trim($msg)])->withInput();
-            }
-            return back()->withErrors(['main' => 'Error del sistema: ' . $errorMessage])->withInput();
+        } catch(\Exception $e){
+            Log::error('Error al registrar usuario:' . $e->getMessage());
+            return back()->withErrors(['main' => 'Ocurrió un problema al crear tu cuenta. Intenta de nuevo más tarde.'])->withInput();
         }
+        
     }
+
     public function editProfile()
     {
         $user = Auth::user();
         return view('recepcionista.edit', compact('user'));
     }
+
     public function updateProfile(Request $request)
     {
         /** @var \App\Models\User $user */
@@ -244,14 +350,29 @@ class AuthController extends Controller
         return redirect()->route('home')
             ->with('success', 'Perfil actualizado correctamente');
     }
+
     public function logout(Request $request)
     {
+        $userId = Auth::id();
+
+        if ($userId) {
+            \App\Models\Auditoria::registrar(
+                accion: 'Cierre de sesión',
+                usuarioId: $userId,
+                tabla: 'usuarios',
+                registroId: (string) $userId,
+                request: $request
+            );
+        }
+
         Auth::logout();
-        $request->session()->invalidate();
+        // Limpiamos los datos del usuario de la sesión pero mantenemos el registro de sesión/IP en la tabla sessions
+        $request->session()->flush();
         $request->session()->regenerateToken();
 
         return redirect('/login');
     }
+
     public function unlock(Request $request)
     {
         $request->validate([
@@ -281,21 +402,28 @@ class AuthController extends Controller
     public function resendTwoFactorCode(Request $request)
     {
         $userId = $request->session()->get('2fa:user:id');
-        $user = User::find($userId);
+        $user = $userId ? User::find($userId) : null;
 
         if (!$user) {
             return redirect()->route('login')
-                ->withErrors(['code' => 'Sesión expirada.']);
+                ->withErrors(['code' => 'Sesión expirada. Por favor inicie sesión nuevamente.']);
         }
 
+        // Valida que solo pueda mandar uno cada 5 minutos
+        if ($user->hasValidTwoFactorCode()) {
+            return redirect()->route('2fa.verify')
+                ->with('info', 'El codigo ya ha sido enviado a su correo introdusca el codigo');
+        }
+
+        // Si expiraron los 5 minutos, genera nuevo código y lo envía
         $code = $user->generateTwoFactorCode();
 
         try {
             $user->notify(new TwoFactorCodeNotification($code));
-            return redirect()->back()->with('success', 'Código reenviado correctamente.');
+            return redirect()->route('2fa.verify')->with('status', 'Un nuevo código ha sido enviado a su correo.');
         } catch (\Exception $e) {
             Log::error('Error al reenviar código 2FA: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['code' => 'Error al enviar el código.']);
+            return redirect()->route('2fa.verify')->withErrors(['code' => 'Error al enviar el correo. Por favor intente más tarde.']);
         }
     }
     public function verifyTwoFactor(Request $request)
@@ -308,7 +436,7 @@ class AuthController extends Controller
         ]);
 
         $userId = $request->session()->get('2fa:user:id');
-        $user = User::find($userId);
+        $user = $userId ? User::find($userId) : null;
 
         if (!$user) {
             return redirect()->route('login')
@@ -317,7 +445,7 @@ class AuthController extends Controller
 
         if (!$user->validateTwoFactorCode($request->code)) {
             return redirect()->back()
-                ->withErrors(['code' => 'Código inválido o expirado.'])
+                ->withErrors(['code' => 'Código incorrecto o ha expirado.'])
                 ->withInput();
         }
 
@@ -328,6 +456,15 @@ class AuthController extends Controller
 
         $request->session()->forget(['2fa:user:id', '2fa:remember']);
         $request->session()->regenerate();
+        $user->recordSessionDetails($request);
+
+        \App\Models\Auditoria::registrar(
+            accion: 'Inicio de sesión con 2FA verificado',
+            usuarioId: $user->id,
+            tabla: 'usuarios',
+            registroId: (string) $user->id,
+            request: $request
+        );
 
         try {
             $loginTime = Carbon::now()->format('d/m/Y H:i:s');
@@ -340,3 +477,5 @@ class AuthController extends Controller
         return $this->redirectByRole($user);
     }
 }
+
+

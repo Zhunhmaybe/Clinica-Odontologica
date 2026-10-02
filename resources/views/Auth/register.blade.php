@@ -22,15 +22,7 @@
             <h2 class="register-title">Crear Cuenta</h2>
             <p class="register-subtitle">Únete a nuestro sistema</p>
 
-            @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
+
 
             
             <form method="POST" action="{{ url('/register') }}">
@@ -66,22 +58,17 @@
                     @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password"
-                        name="password"
-                        class="form-control @error('password') is-invalid @enderror"
-                        required>
-                    @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
+                <x-password-input 
+                    name="password" 
+                    label="Contraseña" 
+                    required 
+                />
 
-                <div class="mb-3">
-                    <label class="form-label">Confirmar Contraseña</label>
-                    <input type="password"
-                        name="password_confirmation"
-                        class="form-control"
-                        required>
-                </div>
+                <x-password-input 
+                    name="password_confirmation" 
+                    label="Confirmar Contraseña" 
+                    required 
+                />
                 <button type="submit" class="btn btn-register">Registrarse</button>
                 <div class="text-center mt-3">
                     ¿Ya tienes cuenta?

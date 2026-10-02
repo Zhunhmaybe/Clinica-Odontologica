@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title','Plantilla')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title','Home')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @stack('styles')
@@ -51,6 +52,34 @@
                 </a>
                 @endcan
 
+                @can('ver-historia')
+                <a href="{{ route('historia_clinica.index') }}"
+                    class="nav-link {{ request()->routeIs('historia_clinica.*') ? 'active' : '' }}">
+                    <i class="fas fa-notes-medical"></i> Historia Clínica
+                </a>
+                @endcan
+
+                @hasanyrole('admin|Super_admin')
+                <a href="{{ route('admin.index') }}"
+                    class="nav-link {{ request()->routeIs('admin.index') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i> Panel Admin
+                </a>
+                @endhasanyrole
+
+                @can('ver-usuarios')
+                <a href="{{ route('admin.usuarios.index') }}"
+                    class="nav-link {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
+                    <i class="fas fa-users-cog"></i> Gestión Usuarios
+                </a>
+                @endcan
+
+                @can('ver-auditoria')
+                <a href="{{ route('auditor.index') }}"
+                    class="nav-link {{ request()->routeIs('auditor.*') ? 'active' : '' }}">
+                    <i class="fas fa-shield-alt"></i> Auditoría
+                </a>
+                @endcan
+
                 {{--Cerrar sesion--}}
                 <div class="user mt-auto">
                     <strong>{{ Auth::user()->nombre}}</strong><br>
@@ -73,6 +102,7 @@
 
     <!-- Script de Bootstrap JS necesario para el menú colapsable -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 
 </html>

@@ -81,11 +81,10 @@ body {
 }
 
 .content {
-    padding: 40px;
-    width: calc(100% - 260px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 30px 40px;
+    width: 100%;
+    min-height: 100vh;
+    flex: 1;
 }
 
 .profile-card {
@@ -95,6 +94,7 @@ body {
     overflow: hidden;
     max-width: 900px;
     width: 100%;
+    margin: 0 auto;
 }
 
 .profile-header {
@@ -105,7 +105,7 @@ body {
     gap: 20px;
 }
 
-.avatar {
+.profile-card .avatar {
     width: 90px;
     height: 90px;
     border-radius: 50%;
@@ -115,7 +115,7 @@ body {
     flex-shrink: 0;
 }
 
-.avatar::after {
+.profile-card .avatar::after {
     content: "+";
     position: absolute;
     bottom: 0;
