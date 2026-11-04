@@ -103,12 +103,8 @@
             </div>
             <div class="modal-body p-4 text-center">
                 @if (Auth::user()->two_factor_enabled)
-                    <div class="mb-3">
-                        <span class="badge bg-success px-3 py-2 fs-6 rounded-pill">
-                            <i class="fas fa-check-circle me-1"></i> Estado: Habilitado en Base de Datos
-                        </span>
-                    </div>
-                    <p class="text-muted mb-3" style="font-size: 14.5px;">
+                    
+                    <p class="text-muted mb-3" style="font-size: 12px;">
                         Tu cuenta está actualmente protegida. Cada vez que inicies sesión se solicitará un código de 6 dígitos que será enviado a tu correo:
                     </p>
                     <div class="alert alert-light border py-2 mb-4">
@@ -131,7 +127,7 @@
                     @if ($sesionesActivas->count() > 0)
                         <div class="mt-4 pt-3 border-top text-start">
                             <h6 class="fw-bold mb-2 text-dark" style="font-size: 13px;">
-                                <i class="fas fa-laptop me-1 text-primary"></i> Sesiones y Dispositivos en BDD ({{ $sesionesActivas->count() }}):
+                                <i class="fas fa-laptop me-1 text-primary"></i> Sesiones y dispositivos activos ({{ $sesionesActivas->count() }})
                             </h6>
                             <ul class="list-group list-group-flush mb-3" style="font-size: 12px;">
                                 @foreach ($sesionesActivas as $ses)
@@ -162,7 +158,7 @@
                         </span>
                     </div>
                     <p class="text-muted mb-3" style="font-size: 14.5px;">
-                        Aumenta la seguridad de tu cuenta activando el doble factor de autenticación. Al activar, cada inicio de sesión requerirá un código de 6 dígitos con validez de 5 minutos enviado a:
+                        Aumenta la seguridad de tu cuenta activando el doble factor de autenticación. Al activar, cada inicio de sesión requerirá un código de 6 dígitos con validez de {{ \App\Models\User::getTwoFactorLifetimeMinutes() == 1 ? '1 minuto' : \App\Models\User::getTwoFactorLifetimeMinutes() . ' minutos' }} enviado a:
                     </p>
                     <div class="alert alert-light border py-2 mb-4">
                         <strong class="text-primary">{{ Auth::user()->email }}</strong>

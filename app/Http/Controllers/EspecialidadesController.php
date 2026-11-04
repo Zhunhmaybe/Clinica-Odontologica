@@ -46,7 +46,7 @@ class EspecialidadesController extends Controller
         // auditar('INSERT', 'especialidades', $espe->id, null, $espe->toArray()); // TODO: Fase 4
 
         return redirect()
-            ->route('admin.especialidades.index')
+            ->route('admin.usuarios.index')
             ->with('success', 'Especialidad creada correctamente');
     }
 
@@ -84,7 +84,7 @@ class EspecialidadesController extends Controller
         // auditar('UPDATE', 'especialidades', $especialidad->id, $antes, $especialidad->fresh()->toArray()); // TODO: Fase 4
 
         return redirect()
-            ->route('admin.especialidades.index')
+            ->route('admin.usuarios.index')
             ->with('success', 'Especialidad actualizada correctamente');
     }
 
@@ -98,7 +98,7 @@ class EspecialidadesController extends Controller
         // Evitar borrar si tiene citas
         if ($especialidad->citas()->count() > 0) {
             return redirect()
-                ->route('admin.especialidades.index')
+                ->route('admin.usuarios.index')
                 ->with('error', 'No se puede eliminar la especialidad porque tiene citas asociadas.');
         }
 
@@ -107,7 +107,7 @@ class EspecialidadesController extends Controller
         // auditar('DELETE', 'especialidades', $id, $especialidad->toArray(), null); // TODO: Fase 4
 
         return redirect()
-            ->route('admin.especialidades.index')
+            ->route('admin.usuarios.index')
             ->with('success', 'Especialidad eliminada correctamente');
     }
 }

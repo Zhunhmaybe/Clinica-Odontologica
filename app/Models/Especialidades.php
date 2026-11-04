@@ -14,6 +14,8 @@ class Especialidades extends Model
     protected $fillable = [
         'nombre',
         'color',
+        'descripcion',
+        'activa',
     ];
 
     /**
@@ -21,6 +23,15 @@ class Especialidades extends Model
      */
     public function citas()
     {
-        return $this->hasMany(Citas::class);
+        return $this->hasMany(Citas::class, 'especialidad_id');
+    }
+
+    /**
+     * Relación: doctores que ejercen esta especialidad (únicamente usuarios con rol doctor,admin y super_admin)
+     */
+    public function doctores()
+    {
+        return $this->belongsToMany(User::class, 'usuario_especialidades', 'especialidad_id', 'usuario_id')
+            ->role(['doctor', 'admin', 'Super_admin']);
     }
 }

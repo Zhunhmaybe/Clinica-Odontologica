@@ -92,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     //Citas
     Route::middleware(['can:ver-citas'])->group(function () {
         Route::get('/citas', [CitasController::class, 'citasIndex'])->name('citas.index');
+        Route::get('/citas/buscar-pacientes', [CitasController::class, 'buscarPacientes'])->name('citas.buscar_pacientes');
     });
     Route::middleware(['can:crear-citas'])->group(function () {
         Route::post('/citas', [CitasController::class, 'citasStore'])->name('citas.store');
@@ -170,18 +171,26 @@ Route::middleware(['auth', 'role:admin|Super_admin'])->group(function () {
     Route::resource('especialidades', EspecialidadesController::class)->except(['show']);
 });
 
-// Gestión de Usuarios (Reutilizable: accesible por cualquier usuario con los permisos otorgados)
+// Módulo de Gestión (Usuarios, Doctores y Especialidades)
 Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:ver-usuarios'])->group(function () {
         Route::get('/gestion-usuarios', [AdminController::class, 'usuariosIndex'])->name('admin.usuarios.index');
+        Route::get('/gestion', [AdminController::class, 'usuariosIndex'])->name('admin.gestion.index');
     });
 
     Route::middleware(['can:crear-usuarios'])->group(function () {
         Route::post('/gestion-usuarios', [AdminController::class, 'usuariosStore'])->name('admin.usuarios.store');
+        Route::post('/gestion/doctores', [AdminController::class, 'doctoresStore'])->name('admin.doctores.store');
     });
 
     Route::middleware(['can:editar-usuarios'])->group(function () {
         Route::put('/gestion-usuarios/{usuario}', [AdminController::class, 'usuariosUpdate'])->name('admin.usuarios.update');
         Route::patch('/gestion-usuarios/{usuario}/toggle', [AdminController::class, 'usuariosToggleEstado'])->name('admin.usuarios.toggle');
+        Route::put('/gestion-usuarios/{usuario}/especialidades', [AdminController::class, 'usuariosAsignarEspecialidad'])->name('admin.usuarios.especialidades');
+        Route::put('/gestion/doctores/{doctor}/especialidades', [AdminController::class, 'doctoresAsignarEspecialidad'])->name('admin.doctores.especialidades');
+    });
+
+    Route::middleware(['can:eliminar-usuarios'])->group(function () {
+        Route::delete('/gestion-usuarios/{usuario}', [AdminController::class, 'usuariosDestroy'])->name('admin.usuarios.destroy');
     });
 });

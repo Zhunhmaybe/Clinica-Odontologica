@@ -72,7 +72,7 @@
                 <input class="form-check-input" type="checkbox" name="remember" id="remember" value="1"
                     {{ session('2fa:remember') ? 'checked' : '' }}>
                 <label class="form-check-label text-muted" for="remember">
-                    Recordarme en este dispositivo e IP
+                    Recordarme en este dispositivo
                 </label>
             </div>
 
@@ -82,12 +82,18 @@
         </form>
 
         {{-- Reenviar código y temporizador --}}
+        @php
+            $lifetimeMinutes = \App\Models\User::getTwoFactorLifetimeMinutes();
+            $minText = $lifetimeMinutes === 1 ? '1 minuto' : "{$lifetimeMinutes} minutos";
+        @endphp
         <div class="resend-box mt-4 pt-3 border-top">
             <p class="timer-box mb-2">
-                El código es válido durante <strong>5 minutos</strong>.
+                El código es válido durante <strong>{{ $minText }}</strong>.
                 <span id="timerContainer" class="d-block mt-1">
                     @if (($remainingSeconds ?? 0) > 0)
                         Puedes solicitar otro código en: <span class="time-remaining" id="timerDisplay">--:--</span>
+                    @else
+                        <span class="text-success fw-bold">✓ Ya puedes solicitar un nuevo código.</span>
                     @endif
                 </span>
             </p>
@@ -114,38 +120,75 @@
         const codeInput = document.getElementById('code');
         const timerDisplay = document.getElementById('timerDisplay');
         const timerContainer = document.getElementById('timerContainer');
-        let remainingSeconds = parseInt("{{ $remainingSeconds ?? 0 }}", 10);
+        const btnResend = document.getElementById('btnResend');
 
-        // Permitir solo números en el input
+        // Permitir solo números en el input de código
         if (codeInput) {
-            codeInput.addEventListener('input', function (e) {
+            codeInput.addEventListener('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
             });
         }
 
-        // Temporizador de 5 minutos para reenviar
+        // Temporizador visual basado en reloj monotónico (performance.now())
+        // 1. Inmune a alteraciones del reloj de Windows/sistema operativo en el cliente.
+        // 2. Mantiene la medición exacta incluso si la pestaña está en segundo plano (abriendo Gmail).
+        const initialSeconds = parseInt("{{ $remainingSeconds ?? 0 }}", 10);
+        const startPerf = performance.now();
+        let timerActive = initialSeconds > 0;
+
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function updateTimer() {
-            if (remainingSeconds > 0) {
+        function getRemainingSeconds() {
+            const elapsedSeconds = (performance.now() - startPerf) / 1000;
+            return Math.max(0, Math.ceil(initialSeconds - elapsedSeconds));
+        }
+
+        function tick() {
+            if (!timerActive) return;
+
+            const remaining = getRemainingSeconds();
+
+            if (remaining > 0) {
                 if (timerDisplay) {
-                    timerDisplay.textContent = formatTime(remainingSeconds);
+                    timerDisplay.textContent = formatTime(remaining);
                 }
-                remainingSeconds--;
-                setTimeout(updateTimer, 1000);
+                setTimeout(tick, 500);
             } else {
+                timerActive = false;
+                if (timerDisplay) {
+                    timerDisplay.textContent = '00:00';
+                }
                 if (timerContainer) {
-                    timerContainer.innerHTML = '<span class="text-muted">El código ha expirado o ya puedes solicitar uno nuevo.</span>';
+                    timerContainer.innerHTML = '<span class="text-success fw-bold">✓ El código ha expirado. Ya puedes solicitar uno nuevo.</span>';
+                }
+                if (btnResend) {
+                    btnResend.removeAttribute('disabled');
+                    btnResend.style.opacity = '1';
                 }
             }
         }
 
-        if (remainingSeconds > 0 && timerDisplay) {
-            updateTimer();
+        // Si el usuario cambia de pestaña a su Gmail y luego regresa, sincronizar inmediatamente
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && timerActive) {
+                tick();
+            }
+        });
+
+        window.addEventListener('focus', function () {
+            if (timerActive) {
+                tick();
+            }
+        });
+
+        if (initialSeconds > 0) {
+            tick();
+        } else if (btnResend) {
+            btnResend.removeAttribute('disabled');
         }
     });
 </script>

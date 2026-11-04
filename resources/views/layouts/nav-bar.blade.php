@@ -16,15 +16,19 @@
     <div class="wrapper">
         <aside class="sidebar">
 
-            <!-- Encabezado del Sidebar (Logo + Hamburguesa en Móvil) -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="logo mb-0 pb-0 border-0">
-                    <img src="/images/logo-danny.png" alt="Logo Danny" style="max-height: 60px; width: auto;">
+            <!-- Encabezado del Sidebar (Logo Centrado y Elegante) -->
+            <div class="sidebar-header mb-4">
+                <div class="d-flex justify-content-between align-items-center d-lg-block text-center">
+                    <div class="logo-wrapper w-100 text-center">
+                        <a href="{{ route('home') }}" class="d-inline-block text-decoration-none">
+                            <img src="/images/logo-danny.png" alt="Danny Lara Dental Solutions" class="sidebar-logo-img">
+                        </a>
+                    </div>
+                    <!-- Botón Hamburguesa (solo visible en móviles) -->
+                    <button class="btn btn-outline-light d-lg-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse" aria-expanded="false" aria-controls="sidebarCollapse">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
-                <!-- Botón Hamburguesa (solo visible en móviles) -->
-                <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse" aria-expanded="false" aria-controls="sidebarCollapse">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
 
             <!-- Contenido del Sidebar Colapsable -->
@@ -68,8 +72,8 @@
 
                 @can('ver-usuarios')
                 <a href="{{ route('admin.usuarios.index') }}"
-                    class="nav-link {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
-                    <i class="fas fa-users-cog"></i> Gestión Usuarios
+                    class="nav-link {{ request()->routeIs('admin.usuarios.*') || request()->routeIs('admin.gestion.*') ? 'active' : '' }}">
+                    <i class="fas fa-cogs"></i> Gestión
                 </a>
                 @endcan
 
@@ -95,7 +99,7 @@
 
         {{-- Botones y accesos con los permisos --}}
         {{-- Perfil --}}
-        <main class="content w-100">
+        <main class="content">
             @yield('content')
         </main>
     </div>

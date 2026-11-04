@@ -22,10 +22,12 @@ class AuditorController extends Controller
             'pacientes',
             'citas',
             'historias_clinicas',
-            'tratamientos',
+            'hc_anamnesis',
+            'odontograma_registros',
+            'hc_diagnosticos',
+            'hc_sesiones_tratamiento',
             'auditoria',
-            'sessions',
-            'dispositivos_2fa'
+            'sessions'
         ];
 
         return view('auditor.index', compact('totalLogs', 'tablasDisponibles'));
@@ -38,7 +40,7 @@ class AuditorController extends Controller
     {
         // Validación básica de seguridad
         $tablasDisponibles = [
-            'usuarios', 'pacientes', 'citas', 'historias_clinicas', 'tratamientos', 'auditoria', 'sessions', 'dispositivos_2fa'
+            'usuarios', 'pacientes', 'citas', 'historias_clinicas', 'hc_anamnesis', 'odontograma_registros', 'hc_diagnosticos', 'hc_sesiones_tratamiento', 'auditoria', 'sessions'
         ];
 
         if (!in_array($tabla, $tablasDisponibles)) {

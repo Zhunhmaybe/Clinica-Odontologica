@@ -150,8 +150,8 @@ function aplicarTratamiento() {
         caras = ['oclusal', 'center'];
     }
 
-    // 1. Pintar en Pantalla
-    pintarDienteEnPantalla(dienteSeleccionado, caras, color);
+    // 1. Pintar en Pantalla con soporte de figuras vectoriales
+    pintarDienteEnPantalla(dienteSeleccionado, caras, color, tratamiento, estado);
 
     // 2. Guardar en Memoria
     if (!estadoOdontograma[dienteSeleccionado]) {
@@ -171,23 +171,116 @@ function aplicarTratamiento() {
     mostrarToast(`Tratamiento aplicado a pieza ${dienteSeleccionado}`, 'success');
 }
 
-function pintarDienteEnPantalla(numero, caras, color) {
+function pintarDienteEnPantalla(numero, caras, color, tratamiento, estado, movilidad, recesion) {
     const svg = document.querySelector(`svg[data-pieza="${numero}"]`);
     if (!svg) return;
 
-    caras.forEach(cara => {
-        let selector = `.${cara}`;
-        if (cara === 'palatina' || cara === 'lingual') selector = '.palatina, .lingual, .bottom';
-        if (cara === 'vestibular') selector = '.vestibular, .top';
-        if (cara === 'mesial') selector = '.mesial, .left';
-        if (cara === 'distal') selector = '.distal, .right';
-        if (cara === 'oclusal') selector = '.oclusal, .center';
+    const container = svg.closest('.diente-container');
+    const simboloLayer = svg.querySelector('.simbolo-layer');
+    const indMovRec = container ? container.querySelector('.indicador-movilidad-recesion') : null;
 
-        svg.querySelectorAll(selector).forEach(parte => {
-            parte.style.fill = color;
-            parte.style.stroke = 'black';
-        });
+    // Resetear caras a blanco base
+    svg.querySelectorAll('.vestibular, .lingual, .distal, .mesial, .oclusal, .palatina, .top, .bottom, .left, .right, .center').forEach(p => {
+        p.style.fill = '#ffffff';
+        p.style.stroke = '#222222';
     });
+
+    if (simboloLayer) simboloLayer.innerHTML = '';
+    if (indMovRec) {
+        indMovRec.textContent = '';
+        indMovRec.title = '';
+    }
+
+    if (!tratamiento || tratamiento === 'Sano') return;
+
+    const t = tratamiento.toLowerCase();
+
+    // Símbolos vectoriales MSP
+    if (t.includes('extracción') || t.includes('extraccion')) {
+        if (simboloLayer) {
+            simboloLayer.innerHTML = `
+                <line x1="5" y1="5" x2="45" y2="45" stroke="#dc3545" stroke-width="5" stroke-linecap="round"/>
+                <line x1="45" y1="5" x2="5" y2="45" stroke="#dc3545" stroke-width="5" stroke-linecap="round"/>
+            `;
+        }
+    } else if (t.includes('ausente') || t.includes('pérdida') || t.includes('perdida')) {
+        if (simboloLayer) {
+            if (t.includes('caries')) {
+                simboloLayer.innerHTML = `
+                    <circle cx="25" cy="25" r="21" fill="none" stroke="#0d6efd" stroke-width="3.5"/>
+                    <line x1="10" y1="10" x2="40" y2="40" stroke="#0d6efd" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="40" y1="10" x2="10" y2="40" stroke="#0d6efd" stroke-width="3.5" stroke-linecap="round"/>
+                `;
+            } else {
+                simboloLayer.innerHTML = `
+                    <circle cx="25" cy="25" r="21" fill="none" stroke="#1e293b" stroke-width="3.5"/>
+                    <line x1="6" y1="20" x2="44" y2="20" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="6" y1="30" x2="44" y2="30" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round"/>
+                `;
+            }
+        }
+    } else if (t.includes('sellante')) {
+        if (simboloLayer) {
+            const cSell = (estado === 'malo') ? '#dc3545' : '#0d6efd';
+            simboloLayer.innerHTML = `
+                <line x1="25" y1="13" x2="25" y2="37" stroke="${cSell}" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="13" y1="25" x2="37" y2="25" stroke="${cSell}" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="16.5" y1="16.5" x2="33.5" y2="33.5" stroke="${cSell}" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="33.5" y1="16.5" x2="16.5" y2="33.5" stroke="${cSell}" stroke-width="3.5" stroke-linecap="round"/>
+            `;
+        }
+    } else if (t.includes('conducto') || t.includes('endodoncia') || t.includes('pulpotomía') || t.includes('pulpotomia')) {
+        if (simboloLayer) {
+            if (estado === 'malo') {
+                simboloLayer.innerHTML = `<polygon points="25,6 44,43 6,43" fill="none" stroke="#dc3545" stroke-width="4" stroke-linejoin="round"/>`;
+            } else {
+                simboloLayer.innerHTML = `<polygon points="25,6 44,43 6,43" fill="#0d6efd" stroke="#0d6efd" stroke-width="2" stroke-linejoin="round"/>`;
+            }
+        }
+    } else if (t.includes('corona')) {
+        if (simboloLayer) {
+            simboloLayer.innerHTML = `<rect x="3" y="3" width="44" height="44" rx="4" fill="none" stroke="${color || '#0d6efd'}" stroke-width="4"/>`;
+        }
+    } else if (t.includes('fija')) {
+        if (simboloLayer) {
+            simboloLayer.innerHTML = `
+                <line x1="0" y1="25" x2="50" y2="25" stroke="${color || '#0d6efd'}" stroke-width="6"/>
+                <circle cx="25" cy="25" r="9" fill="${color || '#0d6efd'}"/>
+            `;
+        }
+    } else if (t.includes('removible')) {
+        if (simboloLayer) {
+            simboloLayer.innerHTML = `
+                <line x1="4" y1="25" x2="46" y2="25" stroke="${color || '#0d6efd'}" stroke-width="4.5" stroke-dasharray="6,4" stroke-linecap="round"/>
+                <path d="M 6,14 C 2,19 2,31 6,36" fill="none" stroke="${color || '#0d6efd'}" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 44,14 C 48,19 48,31 44,36" fill="none" stroke="${color || '#0d6efd'}" stroke-width="3" stroke-linecap="round"/>
+            `;
+        }
+    } else {
+        // Caries, Resina, Amalgama, Ionómero, etc. (se pintan las caras seleccionadas)
+        if (Array.isArray(caras)) {
+            caras.forEach(cara => {
+                let selector = `.${cara}`;
+                if (cara === 'palatina' || cara === 'lingual') selector = '.palatina, .lingual, .bottom';
+                if (cara === 'vestibular') selector = '.vestibular, .top';
+                if (cara === 'mesial') selector = '.mesial, .left';
+                if (cara === 'distal') selector = '.distal, .right';
+                if (cara === 'oclusal') selector = '.oclusal, .center';
+
+                svg.querySelectorAll(selector).forEach(parte => {
+                    parte.style.fill = color;
+                });
+            });
+        }
+    }
+
+    if (indMovRec && (movilidad || recesion)) {
+        let partes = [];
+        if (movilidad) partes.push(`M${movilidad}`);
+        if (recesion) partes.push(`R${recesion}`);
+        indMovRec.textContent = partes.join(' ');
+        indMovRec.title = `Movilidad: Grado ${movilidad || 0}, Recesión: ${recesion || 0}mm`;
+    }
 }
 
 function actualizarListaLateral() {
@@ -314,7 +407,15 @@ function cargarDatosExistentes() {
                         let detalle = JSON.parse(item.observaciones);
                         if (!estadoOdontograma[item.numero_pieza]) estadoOdontograma[item.numero_pieza] = { tratamientos: [] };
                         estadoOdontograma[item.numero_pieza].tratamientos.push(detalle);
-                        pintarDienteEnPantalla(item.numero_pieza, detalle.caras, detalle.color);
+                        pintarDienteEnPantalla(
+                            item.numero_pieza,
+                            detalle.caras,
+                            detalle.color,
+                            detalle.tratamiento,
+                            detalle.estado,
+                            detalle.movilidad,
+                            detalle.recesion
+                        );
                         actualizarTooltipDiente(item.numero_pieza);
                     }
                 } catch(e) {
@@ -342,6 +443,11 @@ function resetearOdontograma() {
                 el.style.fill = 'white';
                 el.style.stroke = 'black';
             }
+        });
+        document.querySelectorAll('.simbolo-layer').forEach(layer => layer.innerHTML = '');
+        document.querySelectorAll('.indicador-movilidad-recesion').forEach(ind => {
+            ind.textContent = '';
+            ind.title = '';
         });
         // Reset tooltips
         document.querySelectorAll('.diente-svg title').forEach(t => {

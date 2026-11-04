@@ -10,6 +10,8 @@ export default defineConfig({
                 'resources/js/app.js', 
                 'resources/css/historia-clinica.css',
                 'resources/css/admin/usuarios.css',
+                'resources/css/navbar/editar-perfil.css',
+                'resources/css/components/citas/create.css',
                 'resources/css/components/pacientes/index.css',
                 'resources/css/components/pacientes/create.css',
                 'resources/css/login/login.css',

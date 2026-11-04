@@ -144,7 +144,7 @@ class AuthController extends Controller
                 $user->recordSessionDetails($request);
 
                 \App\Models\Auditoria::registrar(
-                    accion: 'Inicio de sesión (2FA omitido - Sesión y dispositivo reconocido en tabla sessions)',
+                    accion: 'Inicio de sesión (2FA omitido - Dispositivo confiable)',
                     usuarioId: $user->id,
                     tabla: 'usuarios',
                     registroId: (string) $user->id,
@@ -155,7 +155,7 @@ class AuthController extends Controller
                     $loginTime = Carbon::now()->format('d/m/Y H:i:s');
                     $ipAddress = $request->ip();
                     $user->notify(new LoginNotification($loginTime, $ipAddress));
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     Log::error('Error al enviar notificación de login: ' . $e->getMessage());
                 }
 
@@ -177,7 +177,7 @@ class AuthController extends Controller
             try {
                 $user->notify(new TwoFactorCodeNotification($code));
                 $message = 'Hemos enviado un código de verificación a su correo electrónico.';
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error('Error al enviar código 2FA: ' . $e->getMessage());
                 $message = 'Código generado, pero ocurrió un problema al enviar el correo. Verifique la configuración de correo.';
             }
@@ -211,7 +211,7 @@ class AuthController extends Controller
             $loginTime = Carbon::now()->format('d/m/Y H:i:s');
             $ipAddress = $request->ip();
             $user->notify(new LoginNotification($loginTime, $ipAddress));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error al enviar notificación de login: ' . $e->getMessage());
         }
 

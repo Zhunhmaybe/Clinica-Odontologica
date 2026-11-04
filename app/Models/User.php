@@ -129,12 +129,26 @@ class User extends Authenticatable
     }
     //----------------------------------------------------------------
     // Métodos para 2FA
+    //----------------------------------------------------------------
+
+    /**
+     * Duración en minutos de la validez del código 2FA.
+     * Modifique directamente este valor según lo requiera (ejemplo: 5 minutos).
+     */
+    const TWO_FACTOR_EXPIRATION_MINUTES = 1;
+
+    public static function getTwoFactorLifetimeMinutes(): int
+    {
+        return self::TWO_FACTOR_EXPIRATION_MINUTES;
+    }
+
     public function generateTwoFactorCode(): string
     {
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $this->two_factor_code = $code;
-        $this->two_factor_expires_at = Carbon::now()->addMinutes(5);
+        // Medido estrictamente con el tiempo del servidor en el que se ejecuta la aplicación
+        $this->two_factor_expires_at = Carbon::now()->addMinutes(self::getTwoFactorLifetimeMinutes());
         $this->save();
 
         return $code;
@@ -157,7 +171,10 @@ class User extends Authenticatable
             ? Carbon::parse($this->two_factor_expires_at)
             : $this->two_factor_expires_at;
 
-        return Carbon::now()->lt($expiresAt);
+        /* Comprobación basada estrictamente en la marca de tiempo (timestamp Unix) del servidor.
+         Esto previene cualquier manipulación del reloj en la computadora del cliente o discrepancia
+        de zona horaria al desplegar en servidores/hosting en producción.*/
+        return Carbon::now()->timestamp < $expiresAt->timestamp;
     }
 
     public function getTwoFactorRemainingSeconds(): int
@@ -170,7 +187,7 @@ class User extends Authenticatable
             ? Carbon::parse($this->two_factor_expires_at)
             : $this->two_factor_expires_at;
 
-        return max(0, (int) Carbon::now()->diffInSeconds($expiresAt, false));
+        return max(0, $expiresAt->timestamp - Carbon::now()->timestamp);
     }
 
     public function validateTwoFactorCode($code): bool
@@ -185,6 +202,16 @@ class User extends Authenticatable
     public function auditorias()
     {
         return $this->hasMany(\App\Models\Auditoria::class, 'usuario_id');
+    }
+
+    public function especialidades()
+    {
+        return $this->belongsToMany(\App\Models\Especialidades::class, 'usuario_especialidades', 'usuario_id', 'especialidad_id');
+    }
+
+    public function citasComoDoctor()
+    {
+        return $this->hasMany(\App\Models\Citas::class, 'doctor_id');
     }
 
     /**

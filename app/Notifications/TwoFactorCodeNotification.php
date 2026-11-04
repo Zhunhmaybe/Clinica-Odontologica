@@ -11,10 +11,12 @@ class TwoFactorCodeNotification extends Notification
     use Queueable;
 
     protected $code;
+    protected $minutes;
 
-    public function __construct($code)
+    public function __construct($code, $minutes = null)
     {
         $this->code = $code;
+        $this->minutes = $minutes ?? \App\Models\User::getTwoFactorLifetimeMinutes();
     }
 
     public function via($notifiable)
@@ -24,13 +26,16 @@ class TwoFactorCodeNotification extends Notification
 
     public function toMail($notifiable)
     {
+        $mins = $this->minutes;
+        $minText = $mins === 1 ? '1 minuto' : "{$mins} minutos";
+
         return (new MailMessage)
             ->subject('Código de Verificación 2FA')
             ->greeting('¡Hola ' . $notifiable->nombre . '!')
             ->line('Has solicitado iniciar sesión en tu cuenta.')
             ->line('Tu código de verificación es:')
             ->line('**' . $this->code . '**')
-            ->line('Este código expirará en 5 minutos.')
+            ->line('Este código expirará en ' . $minText . '.')
             ->line('Si no fuiste tú, ignora este mensaje.')
             ->line('¡Gracias por mantener tu cuenta segura!');
     }

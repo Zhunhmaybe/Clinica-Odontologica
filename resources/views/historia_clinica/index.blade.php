@@ -3,11 +3,7 @@
 @section('title', 'Historial Clínico')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('build/assets/historia-clinica.css') }}">
-<style>
-    /* Inline fallback si Vite no compila el CSS aún */
-    @import url('/resources/css/historia-clinica.css');
-</style>
+    @vite(['resources/css/historia-clinica.css'])
 @endpush
 
 @section('content')

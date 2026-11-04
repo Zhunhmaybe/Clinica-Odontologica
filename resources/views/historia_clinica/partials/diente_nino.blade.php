@@ -16,5 +16,7 @@
         <path class="distal" d="M50,0 L50,50 L25,25 Z" fill="white" stroke="black" stroke-width="1" clip-path="url(#circleClip-{{ $pieza }})"/>
 
         <circle class="oclusal" cx="25" cy="25" r="10" fill="white" stroke="black" stroke-width="1"/>
+        <g class="simbolo-layer"></g>
     </svg>
+    <span class="indicador-movilidad-recesion"></span>
 </div>

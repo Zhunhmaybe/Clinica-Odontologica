@@ -13,29 +13,59 @@ body {
 }
 
 .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
     width: 260px;
+    height: 100vh;
     background: #0b4f79; 
     color: #fff;
     padding: 20px;
     display: flex;
     flex-direction: column; 
-    top: 0;
-    left: 0;
-    height: 100vh;
     z-index: 1000;
-    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.12);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-.sidebar .logo {
-    text-align: center;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
 }
 
-.sidebar .logo img {
-    width: 110px;
+.sidebar-header {
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.sidebar-logo-img {
+    width: 125px;
+    max-width: 100%;
     height: auto;
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.22));
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.sidebar-logo-img:hover {
+    transform: scale(1.03);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.32));
 }
 
 .sidebar .nav-link {
@@ -81,10 +111,13 @@ body {
 }
 
 .content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    max-width: calc(100% - 260px);
     padding: 30px 40px;
-    width: 100%;
     min-height: 100vh;
     flex: 1;
+    transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
 .profile-card {
@@ -162,16 +195,20 @@ body {
     font-size: 14px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 991.98px) {
     .sidebar { 
         position: relative; 
         width: 100%; 
         height: auto; 
+        min-height: auto;
+        overflow-y: visible;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     .content { 
         margin-left: 0; 
         width: 100%; 
-        padding: 20px;
+        max-width: 100%;
+        padding: 20px 15px;
     }
     .wrapper { 
         flex-direction: column; 

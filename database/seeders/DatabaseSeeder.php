@@ -15,9 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Ejecutar seeder de Roles y Permisos
+        // 1. Ejecutar seeder de Roles, Permisos y Catálogo CIE-10
         $this->call([
             PermissionSeeder::class,
+            Cie10Seeder::class,
         ]);
 
         // 2. Crear usuario de prueba (opcional)

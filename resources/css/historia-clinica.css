@@ -50,21 +50,23 @@
 .hc-stepper {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    margin-bottom: 24px;
+    align-items: flex-start;
+    padding: 20px 24px;
+    margin-bottom: 28px;
     position: relative;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .hc-stepper::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 5%;
-    right: 5%;
+    top: 42px;
+    left: 6%;
+    right: 6%;
     height: 3px;
     background: #e9ecef;
-    transform: translateY(-50%);
     z-index: 0;
 }
 
@@ -76,21 +78,23 @@
     z-index: 1;
     cursor: pointer;
     transition: var(--hc-transition);
+    flex: 1;
 }
 
 .hc-step-number {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: #e9ecef;
-    color: #6c757d;
+    background: #f1f5f9;
+    color: #64748b;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     transition: var(--hc-transition);
-    border: 3px solid transparent;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .hc-step.active .hc-step-number {
@@ -107,12 +111,13 @@
 }
 
 .hc-step-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    color: #adb5bd;
+    color: #64748b;
     margin-top: 8px;
     text-align: center;
-    max-width: 80px;
+    max-width: 130px;
+    line-height: 1.3;
     transition: var(--hc-transition);
 }
 
@@ -443,12 +448,16 @@
 
 .diente-container {
     display: inline-block;
-    margin: 2px;
+    vertical-align: top;
+    margin: 2px 2px;
     text-align: center;
     position: relative;
+    width: 44px;
 }
 
 .diente-svg {
+    display: block;
+    margin: 0 auto;
     cursor: pointer;
     transition: transform 0.2s;
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
@@ -462,9 +471,11 @@
 .numero-pieza {
     font-size: 11px;
     font-weight: bold;
-    color: #555;
+    color: #475569;
     margin-bottom: 2px;
     display: block;
+    height: 15px;
+    line-height: 15px;
 }
 
 .diente-svg polygon,
@@ -474,18 +485,67 @@
     transition: fill 0.3s ease;
 }
 
-.diente-svg polygon:hover,
-.diente-svg rect:hover,
-.diente-svg path:hover,
-.diente-svg circle:hover {
+.simbolo-layer {
+    pointer-events: none;
+}
+
+.simbolo-layer line,
+.simbolo-layer path,
+.simbolo-layer circle,
+.simbolo-layer polygon,
+.simbolo-layer rect {
+    pointer-events: none;
+}
+
+.indicador-movilidad-recesion {
+    font-size: 8.5px;
+    font-weight: 700;
+    display: block;
+    width: 100%;
+    height: 16px;
+    min-height: 16px;
+    line-height: 15px;
+    text-align: center;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.indicador-movilidad-recesion:empty {
+    visibility: hidden;
+}
+
+.indicador-movilidad-recesion:not(:empty) {
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 4px;
+    border: 1px solid #fcd34d;
+    padding: 0 1px;
+}
+
+.cuadrante-separador {
+    display: inline-block;
+    vertical-align: top;
+    height: 42px;
+    margin: 17px 8px 0 8px;
+    border-right: 2px solid #cbd5e1;
+}
+
+.diente-svg > polygon:hover,
+.diente-svg > rect:hover,
+.diente-svg > path:hover,
+.diente-svg > circle:hover {
     opacity: 0.7;
 }
 
 /* Caras checkbox modal */
-.cara-checkbox:checked + .btn-cara {
-    background-color: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+.cara-checkbox:checked + .btn-cara,
+.wiz-cara-chk:checked + .btn-cara {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
 }
 
 .btn-cara {

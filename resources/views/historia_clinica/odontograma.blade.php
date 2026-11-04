@@ -3,7 +3,7 @@
 @section('title', 'Odontograma Interactivo')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('build/assets/historia-clinica.css') }}">
+    @vite(['resources/css/historia-clinica.css'])
 @endpush
 
 @section('content')
@@ -74,11 +74,10 @@
 
                 {{-- ADULTOS SUPERIOR (18-11 | 21-28) --}}
                 <div class="mb-4">
-                    <span class="me-3"></span>
                     @foreach([18,17,16,15,14,13,12,11] as $pieza)
                         @include('historia_clinica.partials.diente_adulto', ['pieza' => $pieza])
                     @endforeach
-                    <span class="mx-3 border-end" style="border-color: #999 !important;"></span>
+                    <span class="cuadrante-separador"></span>
                     @foreach([21,22,23,24,25,26,27,28] as $pieza)
                         @include('historia_clinica.partials.diente_adulto', ['pieza' => $pieza])
                     @endforeach
@@ -90,7 +89,7 @@
                         @foreach([55,54,53,52,51] as $pieza)
                             @include('historia_clinica.partials.diente_nino', ['pieza' => $pieza])
                         @endforeach
-                        <span class="mx-3 border-end" style="border-color: #999 !important;"></span>
+                        <span class="cuadrante-separador"></span>
                         @foreach([61,62,63,64,65] as $pieza)
                             @include('historia_clinica.partials.diente_nino', ['pieza' => $pieza])
                         @endforeach
@@ -99,7 +98,7 @@
                         @foreach([85,84,83,82,81] as $pieza)
                             @include('historia_clinica.partials.diente_nino', ['pieza' => $pieza])
                         @endforeach
-                        <span class="mx-3 border-end" style="border-color: #999 !important;"></span>
+                        <span class="cuadrante-separador"></span>
                         @foreach([71,72,73,74,75] as $pieza)
                             @include('historia_clinica.partials.diente_nino', ['pieza' => $pieza])
                         @endforeach
@@ -108,11 +107,10 @@
 
                 {{-- ADULTOS INFERIOR (48-41 | 31-38) --}}
                 <div class="mt-4">
-                    <span class="me-3"></span>
                     @foreach([48,47,46,45,44,43,42,41] as $pieza)
                         @include('historia_clinica.partials.diente_adulto', ['pieza' => $pieza])
                     @endforeach
-                    <span class="mx-3 border-end" style="border-color: #999 !important;"></span>
+                    <span class="cuadrante-separador"></span>
                     @foreach([31,32,33,34,35,36,37,38] as $pieza)
                         @include('historia_clinica.partials.diente_adulto', ['pieza' => $pieza])
                     @endforeach
@@ -125,21 +123,22 @@
                 <h5><i class="fas fa-chart-bar text-primary me-2"></i>Índices de Salud Bucal</h5>
                 <div class="row">
                     {{-- CPO-D (Adultos) --}}
+                    @php $ind = $historia->indicadoresSalud; @endphp
                     <div class="col-md-6">
                         <div class="hc-indice-grupo">
                             <label class="d-block mb-2"><strong>CPO-D</strong> (Permanentes)</label>
                             <div class="row g-2">
                                 <div class="col-4">
                                     <label class="form-label small">Cariados</label>
-                                    <input type="number" class="form-control form-control-sm" id="cpo_cariados" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="cpo_cariados" value="{{ $ind->cpo_c ?? 0 }}" min="0">
                                 </div>
                                 <div class="col-4">
                                     <label class="form-label small">Perdidos</label>
-                                    <input type="number" class="form-control form-control-sm" id="cpo_perdidos" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="cpo_perdidos" value="{{ $ind->cpo_p ?? 0 }}" min="0">
                                 </div>
                                 <div class="col-4">
                                     <label class="form-label small">Obturados</label>
-                                    <input type="number" class="form-control form-control-sm" id="cpo_obturados" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="cpo_obturados" value="{{ $ind->cpo_o ?? 0 }}" min="0">
                                 </div>
                             </div>
                         </div>
@@ -151,15 +150,15 @@
                             <div class="row g-2">
                                 <div class="col-4">
                                     <label class="form-label small">Cariados</label>
-                                    <input type="number" class="form-control form-control-sm" id="ceo_cariados" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="ceo_cariados" value="{{ $ind->ceo_c ?? 0 }}" min="0">
                                 </div>
                                 <div class="col-4">
                                     <label class="form-label small">Extracción</label>
-                                    <input type="number" class="form-control form-control-sm" id="ceo_extraccion" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="ceo_extraccion" value="{{ $ind->ceo_e ?? 0 }}" min="0">
                                 </div>
                                 <div class="col-4">
                                     <label class="form-label small">Obturados</label>
-                                    <input type="number" class="form-control form-control-sm" id="ceo_obturados" value="0" min="0">
+                                    <input type="number" class="form-control form-control-sm" id="ceo_obturados" value="{{ $ind->ceo_o ?? 0 }}" min="0">
                                 </div>
                             </div>
                         </div>
@@ -169,19 +168,19 @@
                     <div class="col-md-4">
                         <div class="hc-indice-grupo">
                             <label class="form-label small">Placa Bacteriana</label>
-                            <input type="number" class="form-control form-control-sm" id="placa_bacteriana" value="0" min="0" max="100" step="0.1">
+                            <input type="number" class="form-control form-control-sm" id="placa_bacteriana" value="{{ $ind->placa_total ?? 0 }}" min="0" max="100" step="0.1">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="hc-indice-grupo">
                             <label class="form-label small">Cálculo Dental</label>
-                            <input type="number" class="form-control form-control-sm" id="calculo_dental" value="0" min="0" max="100" step="0.1">
+                            <input type="number" class="form-control form-control-sm" id="calculo_dental" value="{{ $ind->calculo_total ?? 0 }}" min="0" max="100" step="0.1">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="hc-indice-grupo">
                             <label class="form-label small">Gingivitis</label>
-                            <input type="number" class="form-control form-control-sm" id="gingivitis" value="0" min="0" max="100" step="0.1">
+                            <input type="number" class="form-control form-control-sm" id="gingivitis" value="{{ $ind->gingivitis_total ?? 0 }}" min="0" max="100" step="0.1">
                         </div>
                     </div>
                 </div>

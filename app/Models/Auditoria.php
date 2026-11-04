@@ -60,14 +60,14 @@ class Auditoria extends Model
 
         return self::create([
             'usuario_id'         => $usuarioId ?? auth()->id(),
-            'accion'             => $accion,
-            'tabla_afectada'     => $tabla,
-            'registro_id'        => $registroId,
+            'accion'             => mb_substr($accion, 0, 255),
+            'tabla_afectada'     => $tabla ? mb_substr($tabla, 0, 100) : null,
+            'registro_id'        => $registroId ? mb_substr($registroId, 0, 50) : null,
             'valores_anteriores' => $anteriores,
             'valores_nuevos'     => $nuevos,
-            'ip_address'         => $ip,
-            'dispositivo'        => DeviceDetector::getDevice($ua),
-            'ubicacion'          => DeviceDetector::getLocation($ip),
+            'ip_address'         => $ip ? mb_substr($ip, 0, 45) : null,
+            'dispositivo'        => mb_substr(DeviceDetector::getDevice($ua), 0, 150),
+            'ubicacion'          => mb_substr(DeviceDetector::getLocation($ip), 0, 150),
             'user_agent'         => $ua,
             'created_at'         => Carbon::now(),
         ]);
