@@ -120,6 +120,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:editar-historia'])->group(function () {
         Route::get('/historia-clinica/crear', [HistoriaClinicaController::class, 'create'])->name('historia_clinica.create');
         Route::post('/historia-clinica', [HistoriaClinicaController::class, 'store'])->name('historia_clinica.store');
+        Route::get('/historia-clinica/{id}/editar', [HistoriaClinicaController::class, 'edit'])->name('historia_clinica.edit')->whereNumber('id');
+        Route::put('/historia-clinica/{id}', [HistoriaClinicaController::class, 'update'])->name('historia_clinica.update')->whereNumber('id');
+        Route::post('/historia-clinica/{id}/firmar', [HistoriaClinicaController::class, 'firmarBorrador'])->name('historia_clinica.firmar')->whereNumber('id');
         Route::get('/historia-clinica/odontograma/{id}', [HistoriaClinicaController::class, 'editarOdontograma'])->name('historia_clinica.odontograma')->whereNumber('id');
         Route::post('/historia-clinica/odontograma/{id}', [HistoriaClinicaController::class, 'guardarOdontograma'])->name('historia_clinica.odontograma.guardar')->whereNumber('id');
         Route::post('/historia-clinica/{id}/diagnostico', [HistoriaClinicaController::class, 'agregarDiagnostico'])->name('historia_clinica.diagnostico.store')->whereNumber('id');

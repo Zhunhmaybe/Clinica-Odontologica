@@ -165,6 +165,8 @@
 }
 
 .hc-card-header.section-a { background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%); }
+.hc-card-header.section-azul { background: linear-gradient(135deg, var(--hc-primary) 0%, var(--hc-primary-light) 100%); }
+
 .hc-card-header.section-b { background: linear-gradient(135deg, var(--hc-info) 0%, var(--hc-info-light) 100%); }
 .hc-card-header.section-d { background: linear-gradient(135deg, var(--hc-warning) 0%, var(--hc-warning-light) 100%); }
 .hc-card-header.section-f { background: linear-gradient(135deg, var(--hc-success) 0%, var(--hc-success-light) 100%); }
@@ -716,3 +718,57 @@
         font-size: 9px;
     }
 }
+
+/* ========== BLOQUES COMPLEMENTARIOS WIZARD (HCU-033) ========== */
+.msp-code-badge {
+    background: #1e293b;
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.4px;
+}
+
+.ant-item-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.ant-item-card.selected {
+    border-color: #c49a6c;
+    background: #fffdf9;
+    box-shadow: 0 2px 8px rgba(196, 154, 108, 0.15);
+}
+
+.estoma-item-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.estoma-item-card.selected {
+    border-color: #5b7c99;
+    background: #f8fbff;
+}
+
+.cpo-auto-badge {
+    font-size: 11px;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.higiene-table th, .higiene-table td {
+    vertical-align: middle;
+    text-align: center;
+    font-size: 13px;
+}
+

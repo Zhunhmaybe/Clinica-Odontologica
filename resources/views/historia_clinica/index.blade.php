@@ -99,7 +99,10 @@
                                 </span>
                             </td>
                             <td>
-                                @if($historia->estado_historia === 'abierta')
+                                @php $estadoActual = $historia->estado ?? $historia->estado_historia; @endphp
+                                @if($estadoActual === 'borrador')
+                                <span class="badge bg-warning text-dark"><i class="fas fa-edit me-1"></i> Borrador</span>
+                                @elseif($estadoActual === 'abierta')
                                 <span class="hc-badge-abierta">Abierta</span>
                                 @else
                                 <span class="hc-badge-cerrada">Cerrada</span>
@@ -112,6 +115,12 @@
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     @can('editar-historia')
+                                    @if(($historia->estado ?? $historia->estado_historia) === 'borrador')
+                                    <a href="{{ route('historia_clinica.edit', $historia->id) }}"
+                                       class="btn btn-sm btn-warning text-dark fw-semibold" title="Continuar Editando Borrador">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    @endif
                                     <a href="{{ route('historia_clinica.odontograma', $historia->id) }}"
                                        class="btn btn-sm btn-outline-warning" title="Odontograma">
                                         <i class="fas fa-tooth"></i>

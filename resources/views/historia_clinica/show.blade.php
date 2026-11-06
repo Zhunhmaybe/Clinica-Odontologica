@@ -50,6 +50,11 @@
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
                 @can('editar-historia')
+                @if($historia->estado === 'borrador')
+                <a href="{{ route('historia_clinica.edit', $historia->id) }}" class="hc-btn-action btn btn-warning text-dark fw-bold">
+                    <i class="fas fa-edit"></i> Continuar Editando Borrador
+                </a>
+                @endif
                 <a href="{{ route('historia_clinica.odontograma', $historia->id) }}" class="hc-btn-action hc-btn-warning">
                     <i class="fas fa-tooth"></i> Editor Odontograma
                 </a>
@@ -62,6 +67,38 @@
     <div class="alert alert-success border-0 rounded-3 alert-dismissible fade show shadow-sm">
         <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger border-0 rounded-3 alert-dismissible fade show shadow-sm">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
+    @if($historia->estado === 'borrador')
+    <div class="alert alert-warning border-start border-warning border-4 rounded-3 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h6 class="fw-bold mb-1"><i class="fas fa-file-signature me-2"></i>Esta Historia Clínica se encuentra en estado BORRADOR</h6>
+            <p class="mb-0 small">
+                Los datos aún pueden ser modificados en el asistente completo (Bloques A–P) antes de emitir la firma digital SHA-256 definitiva del Formulario HCU-033.
+            </p>
+        </div>
+        @can('editar-historia')
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('historia_clinica.edit', $historia->id) }}" class="btn btn-dark btn-sm fw-semibold px-3">
+                <i class="fas fa-edit me-1"></i> Continuar Editando (Pasos 1–6)
+            </a>
+            <form action="{{ route('historia_clinica.firmar', $historia->id) }}" method="POST" class="d-inline"
+                  onsubmit="return confirm('¿Está seguro de que desea FIRMAR Y ACTIVAR esta Historia Clínica HCU-033? Una vez firmada pasará a estado ABIERTA con sello SHA-256.');">
+                @csrf
+                <button type="submit" class="btn btn-success btn-sm fw-bold px-3">
+                    <i class="fas fa-check-double me-1"></i> Firmar y Activar HCU-033
+                </button>
+            </form>
+        </div>
+        @endcan
     </div>
     @endif
 
@@ -446,6 +483,37 @@
                 <p class="mb-0">{{ $historia->observaciones }}</p>
             </div>
             @endif
+
+            {{-- BLOQUE O: Datos del Profesional y Sello Digital --}}
+            <div class="hc-glass-card">
+                <div class="hc-card-header section-obs" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                    <i class="fas fa-shield-alt"></i> O. FIRMA Y SELLO DIGITAL (MSP)
+                </div>
+                <div class="small">
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted">Profesional:</span>
+                        <strong>Dr(a). {{ $historia->profesional->nombre ?? '' }} {{ $historia->profesional->apellido ?? '' }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted">Código / Cédula MSP:</span>
+                        <strong>{{ $historia->codigo_profesional ?? '-' }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-muted">Estado de Firma:</span>
+                        @if($historia->firma_hash)
+                            <span class="badge bg-success"><i class="fas fa-lock me-1"></i> Firmado (SHA-256)</span>
+                        @else
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Pendiente (Borrador)</span>
+                        @endif
+                    </div>
+                    @if($historia->firma_hash)
+                    <div class="mt-2 p-2 bg-light rounded-2 text-break" style="font-family: monospace; font-size: 11px;">
+                        <strong class="d-block text-muted mb-1">Hash SHA-256:</strong>
+                        {{ $historia->firma_hash }}
+                    </div>
+                    @endif
+                </div>
+            </div>
 
         </div>
     </div>
