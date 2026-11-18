@@ -33,8 +33,7 @@
     <div class="hc-header-banner">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="msp-code-badge">SNS-MSP / HCU-form.033 / 2021</span>
+                <div class="d-flex align-items-center gap-2 mb-1">                    
                     @if($esEdicion)
                     <span class="badge bg-warning text-dark fw-bold">
                         <i class="fas fa-edit me-1"></i> EDITANDO BORRADOR ({{ $historia->numero_historia }})
@@ -663,10 +662,10 @@
 
                             {{-- CPO Dientes Definitivos (11-48) --}}
                             <div class="p-3 bg-light rounded-3 mb-3">
-                                <h6 class="fw-bold text-primary mb-2">Dientes Definitivos (CPO-D)</h6>
+                                <h6 class="fw-bold text-me mb-2">Dientes Definitivos (CPO-D)</h6>
                                 <div class="row g-2 text-center">
                                     <div class="col-3">
-                                        <label class="small fw-bold text-danger">C (Cariados)</label>
+                                        <label class="small fw-bold text-roj">C (Cariados)</label>
                                         <input type="number" name="cpo_c" id="cpo_c" class="form-control text-center fw-bold" value="{{ old('cpo_c', $indicadores?->cpo_c ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
@@ -674,7 +673,7 @@
                                         <input type="number" name="cpo_p" id="cpo_p" class="form-control text-center fw-bold" value="{{ old('cpo_p', $indicadores?->cpo_p ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
-                                        <label class="small fw-bold text-primary">O (Obturados)</label>
+                                        <label class="small fw-bold text-ver">O (Obturados)</label>
                                         <input type="number" name="cpo_o" id="cpo_o" class="form-control text-center fw-bold" value="{{ old('cpo_o', $indicadores?->cpo_o ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
@@ -689,7 +688,7 @@
                                 <h6 class="fw-bold text-secondary mb-2">Dientes Temporales (ceo-d)</h6>
                                 <div class="row g-2 text-center">
                                     <div class="col-3">
-                                        <label class="small fw-bold text-danger">c (cariados)</label>
+                                        <label class="small fw-bold text-roj">c (cariados)</label>
                                         <input type="number" name="ceo_c" id="ceo_c" class="form-control text-center fw-bold" value="{{ old('ceo_c', $indicadores?->ceo_c ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
@@ -697,7 +696,7 @@
                                         <input type="number" name="ceo_e" id="ceo_e" class="form-control text-center fw-bold" value="{{ old('ceo_e', $indicadores?->ceo_e ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
-                                        <label class="small fw-bold text-primary">o (obturados)</label>
+                                        <label class="small fw-bold text-ver">o (obturados)</label>
                                         <input type="number" name="ceo_o" id="ceo_o" class="form-control text-center fw-bold" value="{{ old('ceo_o', $indicadores?->ceo_o ?? 0) }}" min="0" oninput="actualizarTotalesCpo()">
                                     </div>
                                     <div class="col-3">
@@ -798,7 +797,7 @@
 
             {{-- BLOQUE N: DIAGNÓSTICOS CIE-10 --}}
             <div class="hc-card">
-                <div class="hc-card-header section-diag justify-content-between">
+                <div class="hc-card-header section-azul justify-content-between">
                     <span><i class="fas fa-diagnoses me-2"></i> N. DIAGNÓSTICOS ODONTOLÓGICOS (CIE-10)</span>
                     <button type="button" class="btn btn-sm btn-light fw-bold" onclick="agregarFilaDiagnostico()">
                         <i class="fas fa-plus me-1"></i> Añadir Diagnóstico (Máx. 6)
@@ -903,7 +902,7 @@
         <div class="hc-step-content" data-step="5">
             {{-- BLOQUE P: SESIÓN DE TRATAMIENTO INICIAL --}}
             <div class="hc-card">
-                <div class="hc-card-header section-treat">
+                <div class="hc-card-header section-azul">
                     <i class="fas fa-Notes-medical me-2"></i> P. TRATAMIENTO REALIZADO EN ESTA SESIÓN
                 </div>
                 <div class="card-body">
@@ -965,7 +964,7 @@
                     <i class="fas fa-arrow-left me-1"></i> Anterior
                 </button>
                 <div class="d-flex gap-2">
-                    <button type="submit" formnovalidate class="hc-btn-action hc-btn-warning" onclick="document.getElementById('accion_guardar').value='borrador'">
+                    <button type="submit" formnovalidate class="hc-btn-action hc-btn-creame" onclick="document.getElementById('accion_guardar').value='borrador'">
                         <i class="fas fa-save me-1"></i> {{ $esEdicion ? 'Actualizar Borrador' : 'Guardar como Borrador' }}
                     </button>
                     <button type="submit" class="hc-btn-action hc-btn-success btn-lg" onclick="document.getElementById('accion_guardar').value='abierta'">

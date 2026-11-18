@@ -150,14 +150,17 @@ class AuthController extends Controller
                     registroId: (string) $user->id,
                     request: $request
                 );
-
-                try {
-                    $loginTime = Carbon::now()->format('d/m/Y H:i:s');
-                    $ipAddress = $request->ip();
-                    $user->notify(new LoginNotification($loginTime, $ipAddress));
-                } catch (\Throwable $e) {
-                    Log::error('Error al enviar notificación de login: ' . $e->getMessage());
-                }
+                
+                $loginTime = Carbon::now()->format('d/m/Y H:i:s');
+                $ipAddress = $request->ip();
+                defer(function()use($user,$loginTime,$ipAddress){
+                    try{
+                        $user->notify(new LoginNotification($loginTime,$ipAddress));
+                    }
+                    catch(\Throwable $e){
+                        Log::warning('No se pudo enviar el correo de notificacion de inicio de sesion(Tiempo de expiracion)'.$e->getMessage());
+                    }
+                });
 
                 return $this->redirectByRole($user);
             }
@@ -207,13 +210,18 @@ class AuthController extends Controller
         );
 
         // PASO 10: ENVIAR NOTIFICACIÓN
-        try {
-            $loginTime = Carbon::now()->format('d/m/Y H:i:s');
-            $ipAddress = $request->ip();
-            $user->notify(new LoginNotification($loginTime, $ipAddress));
-        } catch (\Throwable $e) {
-            Log::error('Error al enviar notificación de login: ' . $e->getMessage());
-        }
+        //carbon sirve para obtener la fecha y hora actual 
+        $loginTime = Carbon::now()->format('d/m/Y H:i:s');
+        
+        $ipAddress = $request->ip();
+        defer(function()use($user,$loginTime,$ipAddress){
+            try{
+                $user->notify(new LoginNotification($loginTime,$ipAddress));
+            }
+            catch(\Throwable $e){
+                Log::warning('No se pudo enviar el correo de notificacion de inicio de sesion(Tiempo de expiracion)'.$e->getMessage());
+            }
+        });
 
         // PASO 11: REDIRECCIÓN POR ROL
         return $this->redirectByRole($user);

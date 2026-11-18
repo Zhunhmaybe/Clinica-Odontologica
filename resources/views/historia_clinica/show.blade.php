@@ -23,7 +23,6 @@
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
             <div>
                 <div class="d-flex gap-2 mb-2 align-items-center flex-wrap">
-                    <span class="badge bg-dark">SNS-MSP / HCU-form.033 / {{ $historia->schema_version ?? '2021' }}</span>
                     <span class="badge bg-light text-dark">HCU Nº: {{ $historia->numero_historia }}</span>
                     <span class="badge bg-{{ $historia->estado === 'abierta' ? 'success' : ($historia->estado === 'borrador' ? 'warning text-dark' : 'secondary') }}">
                         {{ strtoupper($historia->estado ?? 'ABIERTA') }}
@@ -55,7 +54,7 @@
                     <i class="fas fa-edit"></i> Continuar Editando Borrador
                 </a>
                 @endif
-                <a href="{{ route('historia_clinica.odontograma', $historia->id) }}" class="hc-btn-action hc-btn-warning">
+                <a href="{{ route('historia_clinica.odontograma', $historia->id) }}" class="hc-btn-action hc-btn-creame_black">
                     <i class="fas fa-tooth"></i> Editor Odontograma
                 </a>
                 @endcan
@@ -108,7 +107,7 @@
 
             {{-- BLOQUE A: Datos del Establecimiento y Paciente --}}
             <div class="hc-glass-card">
-                <div class="hc-card-header section-a" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                <div class="hc-card-header section-skyblue" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
                     <i class="fas fa-user-circle"></i> A. DATOS DEL ESTABLECIMIENTO Y PACIENTE
                 </div>
                 <div class="row mb-2 small text-muted border-bottom pb-2">
@@ -118,7 +117,7 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-4 mb-2">
-                        <div class="hc-info-box">
+                        <div class="hc-info-box-me">
                             <div class="hc-info-box-icon icon-primary"><i class="fas fa-user"></i></div>
                             <div class="hc-info-box-content">
                                 <small>Paciente</small>
@@ -127,7 +126,7 @@
                         </div>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <div class="hc-info-box">
+                        <div class="hc-info-box-me">
                             <div class="hc-info-box-icon icon-info"><i class="fas fa-id-card"></i></div>
                             <div class="hc-info-box-content">
                                 <small>Cédula / Archivo</small>
@@ -136,7 +135,7 @@
                         </div>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <div class="hc-info-box">
+                        <div class="hc-info-box-me">
                             <div class="hc-info-box-icon icon-success"><i class="fas fa-birthday-cake"></i></div>
                             <div class="hc-info-box-content">
                                 <small>Edad al Abrir</small>
@@ -149,15 +148,15 @@
 
             {{-- BLOQUES B y C: Motivo de Consulta y Enfermedad Actual --}}
             <div class="hc-glass-card">
-                <div class="hc-card-header section-b" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                <div class="hc-card-header section-skyblue" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
                     <i class="fas fa-comment-medical"></i> B y C. MOTIVO DE CONSULTA Y ENFERMEDAD ACTUAL
                 </div>
                 <div class="mb-3">
-                    <h6 class="fw-bold text-primary mb-1">B. Motivo de Consulta:</h6>
+                    <h6 class="fw-bold text-black mb-1">B. Motivo de Consulta:</h6>
                     <p class="mb-0 p-2 bg-light rounded-3 fst-italic">"{{ $anamnesis->motivo_consulta ?? 'No registrado' }}"</p>
                 </div>
                 <div>
-                    <h6 class="fw-bold text-primary mb-1">C. Enfermedad o Problema Actual:</h6>
+                    <h6 class="fw-bold text-black mb-1">C. Enfermedad o Problema Actual:</h6>
                     <p class="mb-2">{{ $anamnesis->enfermedad_actual ?? 'NA' }}</p>
                     @if(!empty($anamnesis->enfermedad_actual_estructurada))
                         @php $est = array_filter($anamnesis->enfermedad_actual_estructurada); @endphp
@@ -174,7 +173,7 @@
 
             {{-- BLOQUES D y E: Antecedentes Personales y Familiares (JSONB) --}}
             <div class="hc-glass-card">
-                <div class="hc-card-header section-d" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                <div class="hc-card-header section-skyblue" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
                     <i class="fas fa-heartbeat"></i> D y E. ANTECEDENTES PATOLÓGICOS PERSONALES Y FAMILIARES
                 </div>
                 <div class="row">
@@ -246,7 +245,7 @@
 
             {{-- BLOQUES L y M: Exámenes Complementarios --}}
             <div class="hc-glass-card">
-                <div class="hc-card-header section-a" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                <div class="hc-card-header section-skyblue" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
                     <i class="fas fa-x-ray"></i> L y M. PLAN DE DIAGNÓSTICO Y EXÁMENES COMPLEMENTARIOS
                 </div>
                 @if($historia->examenes && $historia->examenes->count() > 0)
@@ -402,13 +401,13 @@
                 @if($indicadores)
                     <div class="p-3 bg-light rounded-3 mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-bold text-primary">Índice CPO-D (Adultos)</span>
+                            <span class="fw-bold text-ver-black">Índice CPO-D (Adultos)</span>
                             <span class="badge bg-primary">Total: {{ $indicadores->cpo_total }}</span>
                         </div>
                         <div class="d-flex justify-content-around text-center small border-top pt-2">
-                            <div><strong>C:</strong> {{ $indicadores->cpo_c }}</div>
-                            <div><strong>P:</strong> {{ $indicadores->cpo_p }}</div>
-                            <div><strong>O:</strong> {{ $indicadores->cpo_o }}</div>
+                            <div><strong class="text-roj">C:</strong> {{ $indicadores->cpo_c }}</div>
+                            <div><strong class="text-secondary">P:</strong> {{ $indicadores->cpo_p }}</div>
+                            <div><strong class="text-ver">O:</strong> {{ $indicadores->cpo_o }}</div>
                         </div>
                     </div>
 
@@ -418,9 +417,9 @@
                             <span class="badge bg-secondary">Total: {{ $indicadores->ceo_total }}</span>
                         </div>
                         <div class="d-flex justify-content-around text-center small border-top pt-2">
-                            <div><strong>c:</strong> {{ $indicadores->ceo_c }}</div>
-                            <div><strong>e:</strong> {{ $indicadores->ceo_e }}</div>
-                            <div><strong>o:</strong> {{ $indicadores->ceo_o }}</div>
+                            <div><strong class="text-roj">c:</strong> {{ $indicadores->ceo_c }}</div>
+                            <div><strong class="text-secondary">e:</strong> {{ $indicadores->ceo_e }}</div>
+                            <div><strong class="text-ver">o:</strong> {{ $indicadores->ceo_o }}</div>
                         </div>
                     </div>
 
@@ -449,7 +448,7 @@
 
             {{-- Resumen de Hallazgos del Odontograma (Bloque H) --}}
             <div class="hc-glass-card">
-                <div class="hc-card-header section-a" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
+                <div class="hc-card-header section-f" style="border-radius: 12px; margin: -24px -24px 20px -24px;">
                     <i class="fas fa-tooth"></i> H. HALLAZGOS EN ODONTOGRAMA
                 </div>
                 @if($historia->odontogramaRegistros && $historia->odontogramaRegistros->count() > 0)
