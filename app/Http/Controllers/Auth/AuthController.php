@@ -333,7 +333,7 @@ class AuthController extends Controller
     public function editProfile()
     {
         $user = Auth::user();
-        return view('recepcionista.edit', compact('user'));
+        return view('components.perfil.edit', compact('user'));
     }
 
     public function updateProfile(Request $request)

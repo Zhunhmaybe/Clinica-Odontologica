@@ -44,14 +44,14 @@ Route::middleware(['auth'])->group(function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if ($user->hasRole('usuario')) {
+        if ($user->hasRole('Super_admin') || $user->hasRole('admin')) {
+            return redirect()->route('admin.index');
+        } elseif ($user->hasRole('usuario')) {
             return redirect()->route('usuario.index');
         } elseif ($user->hasRole('recepcionista')) {
             return redirect()->route('recepcionista.index');
         } elseif ($user->hasRole('auditor')) {
             return redirect()->route('auditor.index');
-        } elseif ($user->hasRole('admin')) {
-            return redirect()->route('admin.index');
         } elseif ($user->hasRole('doctor')) {
             return redirect()->route('doctor.index');
         }
