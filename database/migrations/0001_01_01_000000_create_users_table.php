@@ -35,6 +35,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
+            $table->string('dispositivo', 150)->nullable();
+            $table->string('ubicacion', 150)->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });

@@ -265,16 +265,28 @@ class User extends Authenticatable
     {
         $sessionId = $request->session()->getId();
         if ($sessionId) {
-            \Illuminate\Support\Facades\DB::table('sessions')
-                ->where('id', $sessionId)
-                ->update([
-                    'user_id'       => $this->id,
-                    'ip_address'    => $request->ip(),
-                    'user_agent'    => $request->userAgent(),
-                    'dispositivo'   => \App\Services\DeviceDetector::getDevice($request->userAgent()),
-                    'ubicacion'     => \App\Services\DeviceDetector::getLocation($request->ip()),
-                    'last_activity' => time(),
-                ]);
+            $data = [
+                'user_id'       => $this->id,
+                'ip_address'    => $request->ip(),
+                'user_agent'    => $request->userAgent(),
+                'last_activity' => time(),
+            ];
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('sessions', 'dispositivo')) {
+                $data['dispositivo'] = \App\Services\DeviceDetector::getDevice($request->userAgent());
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('sessions', 'ubicacion')) {
+                $data['ubicacion'] = \App\Services\DeviceDetector::getLocation($request->ip());
+            }
+
+            try {
+                \Illuminate\Support\Facades\DB::table('sessions')
+                    ->where('id', $sessionId)
+                    ->update($data);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('No se pudo actualizar detalles de sesión: ' . $e->getMessage());
+            }
         }
     }
 
