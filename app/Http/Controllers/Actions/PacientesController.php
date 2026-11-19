@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Paciente;
 use App\Rules\ValidarCedulaEcuatoriana;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class PacientesController extends Controller
 {
@@ -109,8 +110,9 @@ class PacientesController extends Controller
                     ->withInput();
             }
 
+            Log::error('Error BD al registrar paciente: ' . $errorMessage);
             return back()
-                ->with('error', 'Error de base de datos: ' . $errorMessage)
+                ->with('error', 'Ocurrió un error al registrar el paciente. Intente nuevamente.')
                 ->withInput();
         }
     }
@@ -150,8 +152,9 @@ class PacientesController extends Controller
                     ->withInput();
             }
 
+            Log::error('Error BD al actualizar paciente: ' . $errorMessage);
             return back()
-                ->with('error', 'Error al actualizar: ' . $errorMessage)
+                ->with('error', 'Ocurrió un error al actualizar el paciente. Intente nuevamente.')
                 ->withInput();
         }
     }

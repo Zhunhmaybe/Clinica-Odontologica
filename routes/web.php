@@ -31,13 +31,10 @@ Route::middleware('guest')->group(function () {
     //solo devolver una vizta
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     //procesar el login
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 });
-
-//cerrar sesion de emergencia
-Route::get('/salir-prueba', [AuthController::class, 'logout']);
 
 //Rutas protegidas ,requerimiento: tener una sesion iniciada
 Route::middleware(['auth'])->group(function () {
@@ -67,11 +64,13 @@ Route::middleware(['auth'])->group(function () {
         return view('usuario.index');
     })->name('usuario.index');
     
-    Route::get('/recepcionista', [RecepcionistaController::class, 'index'])->name('recepcionista.index');
-    
-    Route::get('/auditor', [AuditorController::class, 'index'])->name('auditor.index');
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-    Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor.index');
+    // Paneles por rol (temporal: solo Super_admin y admin)
+    Route::middleware(['role:Super_admin|admin'])->group(function () {
+        Route::get('/recepcionista', [RecepcionistaController::class, 'index'])->name('recepcionista.index');
+        Route::get('/auditor', [AuditorController::class, 'index'])->name('auditor.index');
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+        Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor.index');
+    });
 
     // Editar perfil
     Route::get('/perfil', [ProfileController::class, 'showProfile'])
@@ -88,6 +87,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/2fa/enable', [ProfileController::class, 'enable2FA'])->name('profile.2fa.enable');
     Route::post('/profile/2fa/disable', [ProfileController::class, 'disable2FA'])->name('profile.2fa.disable');
     Route::post('/profile/2fa/forget-devices', [ProfileController::class, 'forgetDevices'])->name('profile.2fa.forget-devices');
+
+    // Módulos clínicos (temporal: solo Super_admin y admin)
+    Route::middleware(['role:Super_admin|admin'])->group(function () {
 
     //Citas
     Route::middleware(['can:ver-citas'])->group(function () {
@@ -112,7 +114,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pacientes/crear', [PacientesController::class, 'pacientesCreate'])->name('pacientes.create');
     });
     Route::middleware(['can:editar-pacientes'])->group(function () {
-        Route::post('/pacientes', [PacientesController::class, 'pacientesStore'])->name('pacientes.store');
         Route::put('/pacientes/{paciente}', [PacientesController::class, 'pacientesUpdate'])->name('pacientes.update');
     });
 
@@ -139,6 +140,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:ver-auditoria'])->group(function () {
         Route::get('/auditoria/{tabla}', [AuditorController::class, 'verTabla'])->name('auditor.tablas.show');
     });
+
+    }); // fin grupo role:Super_admin|admin
 });
 
 //recuperar contrasena
@@ -146,24 +149,24 @@ Route::get('/forgot-password', [PasswordResetController::class, 'form'])
     ->name('password.request');
 
 Route::post('/forgot-password', [PasswordResetController::class, 'send'])
+    ->middleware('throttle:3,1')
     ->name('password.email');
 
 Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])
     ->name('password.reset');
 
 Route::post('/reset-password', [PasswordResetController::class, 'update'])
+    ->middleware('throttle:5,1')
     ->name('password.update');
-//cerrar sesion 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 //Desbloquear cuenta
 Route::get('/unlock', [AuthController::class, 'unlockForm'])->name('lock.form');
-Route::post('/unlock', [AuthController::class, 'unlock'])->name('lock.verify');
+Route::post('/unlock', [AuthController::class, 'unlock'])->middleware('throttle:5,1')->name('lock.verify');
 
 // Rutas 2FA (fuera de guest para que funcionen después del primer login)
 Route::get('/2fa/verify', [AuthController::class, 'showTwoFactorForm'])->name('2fa.verify');
-Route::post('/2fa/verify', [AuthController::class, 'verifyTwoFactor'])->name('2fa.verify.post');
-Route::post('/2fa/resend', [AuthController::class, 'resendTwoFactorCode'])->name('2fa.resend');
+Route::post('/2fa/verify', [AuthController::class, 'verifyTwoFactor'])->middleware('throttle:5,1')->name('2fa.verify.post');
+Route::post('/2fa/resend', [AuthController::class, 'resendTwoFactorCode'])->middleware('throttle:3,1')->name('2fa.resend');
 
 //-----------------------------------------------------------Roles y acciones
 
@@ -175,7 +178,7 @@ Route::middleware(['auth', 'role:admin|Super_admin'])->group(function () {
 });
 
 // Módulo de Gestión (Usuarios, Doctores y Especialidades)
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:Super_admin|admin'])->group(function () {
     Route::middleware(['can:ver-usuarios'])->group(function () {
         Route::get('/gestion-usuarios', [AdminController::class, 'usuariosIndex'])->name('admin.usuarios.index');
         Route::get('/gestion', [AdminController::class, 'usuariosIndex'])->name('admin.gestion.index');

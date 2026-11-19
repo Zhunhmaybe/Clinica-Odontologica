@@ -80,10 +80,28 @@ class AdminController extends Controller
     }
 
     /**
+     * Solo un Super_admin puede asignar el rol Super_admin o gestionar a otro Super_admin.
+     */
+    private function protegerSuperAdmin(?string $rolSolicitado = null, ?User $objetivo = null): void
+    {
+        /** @var User $actual */
+        $actual = auth()->user();
+        if ($actual && $actual->hasRole('Super_admin')) {
+            return;
+        }
+
+        if ($rolSolicitado === 'Super_admin' || ($objetivo && $objetivo->hasRole('Super_admin'))) {
+            abort(403, 'Solo un Super Administrador puede realizar esta acción.');
+        }
+    }
+
+    /**
      * Módulo de Gestión de Usuarios: Almacenar nuevo usuario
      */
     public function usuariosStore(Request $request)
     {
+        $this->protegerSuperAdmin($request->input('rol'));
+
         $request->validate([
             'nombre'           => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
@@ -119,6 +137,8 @@ class AdminController extends Controller
      */
     public function usuariosUpdate(Request $request, User $usuario)
     {
+        $this->protegerSuperAdmin($request->input('rol'), $usuario);
+
         $rules = [
             'nombre'           => ['required', 'string', 'max:255'],
             'email'            => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:usuarios,email,'.$usuario->id],
@@ -149,6 +169,10 @@ class AdminController extends Controller
 
         $usuario->update($usuarioData);
 
+        if ($request->filled('password')) {
+            $usuario->clearSessions();
+        }
+
         // Sincronizar el nuevo rol
         $usuario->syncRoles([$request->rol]);
 
@@ -168,6 +192,8 @@ class AdminController extends Controller
      */
     public function usuariosDestroy(User $usuario)
     {
+        $this->protegerSuperAdmin(null, $usuario);
+
         // Evitar que el usuario se elimine a sí mismo
         if ($usuario->id === auth()->id()) {
             return redirect()->route('admin.usuarios.index')
@@ -194,6 +220,8 @@ class AdminController extends Controller
      */
     public function usuariosToggleEstado(User $usuario)
     {
+        $this->protegerSuperAdmin(null, $usuario);
+
         // Evitar que el admin se desactive a sí mismo
         if ($usuario->id === auth()->id()) {
             return redirect()->route('admin.usuarios.index')

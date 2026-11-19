@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\RateLimiter;
 use Carbon\Carbon;
 use Illuminate\Validation\Rules\Password;
 
@@ -90,7 +91,7 @@ class AuthController extends Controller
             // PASO 5: BLOQUEAR DESPUÉS DE 3 INTENTOS
             if ($user->failed_attempts >= 3) {
 
-                $code = rand(100000, 999999);
+                $code = (string) random_int(100000, 999999);
 
                 $user->update([
                     'is_locked' => 1,
@@ -167,6 +168,7 @@ class AuthController extends Controller
 
             $request->session()->put('2fa:user:id', $user->id);
             $request->session()->put('2fa:remember', $request->filled('remember'));
+            $request->session()->put('2fa:attempts', 0);
 
             // Validar si ya tiene un código vigente (menos de 5 minutos)
             if ($user->hasValidTwoFactorCode()) {
@@ -389,14 +391,21 @@ class AuthController extends Controller
         ]);
 
         $code = trim($request->code);
+        $throttleKey = 'unlock:' . Str::lower($request->email) . '|' . $request->ip();
 
-        $user = User::where('email', $request->email)
-            ->where('lock_code', $code)
-            ->first();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seg = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors(['code' => "Demasiados intentos. Intenta de nuevo en {$seg} segundos."]);
+        }
 
-        if (!$user) {
+        $user = User::where('email', $request->email)->where('is_locked', 1)->first();
+
+        if (!$user || empty($user->lock_code) || !hash_equals((string) $user->lock_code, $code)) {
+            RateLimiter::hit($throttleKey, 900); // 15 min
             return back()->withErrors(['code' => 'Código inválido']);
         }
+
+        RateLimiter::clear($throttleKey);
 
         $user->update([
             'failed_attempts' => 0,
@@ -452,6 +461,17 @@ class AuthController extends Controller
         }
 
         if (!$user->validateTwoFactorCode($request->code)) {
+            $intentos = (int) $request->session()->get('2fa:attempts', 0) + 1;
+            $request->session()->put('2fa:attempts', $intentos);
+
+            if ($intentos >= 5) {
+                // Invalida el código y obliga a iniciar sesión de nuevo
+                $user->resetTwoFactorCode();
+                $request->session()->forget(['2fa:user:id', '2fa:remember', '2fa:attempts']);
+                return redirect()->route('login')
+                    ->withErrors(['email' => 'Demasiados intentos fallidos de verificación. Inicia sesión nuevamente.']);
+            }
+
             return redirect()->back()
                 ->withErrors(['code' => 'Código incorrecto o ha expirado.'])
                 ->withInput();
@@ -462,9 +482,10 @@ class AuthController extends Controller
 
         Auth::login($user, $remember);
 
-        $request->session()->forget(['2fa:user:id', '2fa:remember']);
+        $request->session()->forget(['2fa:user:id', '2fa:remember', '2fa:attempts']);
         $request->session()->regenerate();
         $user->recordSessionDetails($request);
+        $user->trustCurrentDevice();
 
         \App\Models\Auditoria::registrar(
             accion: 'Inicio de sesión con 2FA verificado',

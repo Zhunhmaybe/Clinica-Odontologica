@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acceso directo a archivos sensibles en la raíz
+    RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|schema\.dbml|generate_dbml\.php|artisan|phpunit\.xml) - [F,L,NC]
+
+    # Redirigir todo el tráfico hacia /public
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Deshabilitar listado de directorios
+Options -Indexes

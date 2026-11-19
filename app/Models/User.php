@@ -33,6 +33,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'two_factor_code',
+        'lock_code',
     ];
 
     protected function casts(): array
@@ -196,7 +197,7 @@ class User extends Authenticatable
             return false;
         }
 
-        return (string) $this->two_factor_code === trim((string) $code);
+        return hash_equals((string) $this->two_factor_code, trim((string) $code));
     }
 
     public function auditorias()
@@ -215,28 +216,46 @@ class User extends Authenticatable
     }
 
     /**
-     * Verifica si existe una sesión previa confiable para este usuario
-     * con la misma IP y navegador/dispositivo en la tabla 'sessions'.
+     * Nombre de la cookie de dispositivo confiable (cifrada por Laravel).
+     */
+    const TRUSTED_DEVICE_COOKIE = 'hc_trusted_device';
+    const TRUSTED_DEVICE_DAYS = 30;
+
+    /**
+     * Firma HMAC ligada al usuario y a su contraseña actual:
+     * si cambia la contraseña, todos los dispositivos confiables se invalidan.
+     */
+    protected function trustedDeviceSignature(): string
+    {
+        return hash_hmac('sha256', $this->id . '|' . $this->password . '|' . $this->remember_token, config('app.key'));
+    }
+
+    /**
+     * Verifica si el navegador actual fue marcado como confiable tras un 2FA exitoso.
      */
     public function hasTrustedSession(\Illuminate\Http\Request $request): bool
     {
-        $ip = $request->ip();
-        $ua = $request->userAgent();
-
-        if (empty($ip) || empty($ua)) {
+        $valor = $request->cookie(self::TRUSTED_DEVICE_COOKIE);
+        if (empty($valor) || !str_contains($valor, '|')) {
             return false;
         }
 
-        // Verifica si en la tabla 'sessions' existe un registro previo de este usuario
-        // con la misma IP y User Agent dentro de los últimos 30 días
-        $limitTimestamp = Carbon::now()->subDays(30)->timestamp;
+        [$userId, $firma] = explode('|', $valor, 2);
 
-        return \Illuminate\Support\Facades\DB::table('sessions')
-            ->where('user_id', $this->id)
-            ->where('ip_address', $ip)
-            ->where('user_agent', $ua)
-            ->where('last_activity', '>=', $limitTimestamp)
-            ->exists();
+        return (int) $userId === (int) $this->id
+            && hash_equals($this->trustedDeviceSignature(), $firma);
+    }
+
+    /**
+     * Marca el navegador actual como confiable (cookie cifrada, HttpOnly).
+     */
+    public function trustCurrentDevice(): void
+    {
+        \Illuminate\Support\Facades\Cookie::queue(
+            self::TRUSTED_DEVICE_COOKIE,
+            $this->id . '|' . $this->trustedDeviceSignature(),
+            self::TRUSTED_DEVICE_DAYS * 24 * 60
+        );
     }
 
     /**
@@ -267,5 +286,9 @@ class User extends Authenticatable
         \Illuminate\Support\Facades\DB::table('sessions')
             ->where('user_id', $this->id)
             ->delete();
+
+        // Rotar remember_token invalida "recordarme" y todos los dispositivos confiables
+        $this->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->saveQuietly();
+        \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget(self::TRUSTED_DEVICE_COOKIE));
     }
 }

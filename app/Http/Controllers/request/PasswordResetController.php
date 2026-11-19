@@ -6,12 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 
 class PasswordResetController extends Controller
 {
+    /** Minutos de validez del enlace de recuperación */
+    const TOKEN_EXPIRATION_MINUTES = 5;
+
     public function form()
     {
         return view('auth.forgot-password');
@@ -20,65 +25,89 @@ class PasswordResetController extends Controller
     public function send(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:usuarios,email'
+            'email' => 'required|email|max:100',
         ]);
 
-        $token = Str::random(60);
+        // Respuesta genérica para no revelar si el correo existe
+        $mensaje = 'Si el correo está registrado, recibirás un enlace válido por ' . self::TOKEN_EXPIRATION_MINUTES . ' minutos.';
 
-        DB::table('password_resets')
-            ->where('email', $request->email)
-            ->delete();
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->with('status', $mensaje);
+        }
 
+        $token = Str::random(64);
+
+        DB::table('password_resets')->where('email', $user->email)->delete();
         DB::table('password_resets')->insert([
-            'email' => $request->email,
-            'token' => $token,
-            'created_at' => now()
+            'email'      => $user->email,
+            'token'      => Hash::make($token), // se guarda hasheado
+            'created_at' => now(),
         ]);
 
-        $link = route('password.reset', $token);
+        $link = route('password.reset', $token) . '?email=' . urlencode($user->email);
 
-        Mail::raw(
-            "Restablece tu contraseña aquí:\n$link",
-            function ($message) use ($request) {
-                $message->to($request->email)
-                    ->subject('Recuperación de contraseña');
-            }
-        );
-        return back()->with('status', 'Revisa tu correo');
+        try {
+            Mail::raw(
+                "Restablece tu contraseña aquí (válido por " . self::TOKEN_EXPIRATION_MINUTES . " minutos):\n$link",
+                function ($message) use ($user) {
+                    $message->to($user->email)->subject('Recuperación de contraseña');
+                }
+            );
+        } catch (\Throwable $e) {
+            Log::error('Error enviando correo de recuperación: ' . $e->getMessage());
+        }
+
+        return back()->with('status', $mensaje);
     }
 
-    public function resetForm($token)
+    public function resetForm(Request $request, $token)
     {
-        return view('auth.reset-password', compact('token'));
+        $email = $request->query('email');
+        return view('auth.reset-password', compact('token', 'email'));
     }
 
     public function update(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:usuarios,email',
-            'password' => 'required|min:6|confirmed',
-            'token' => 'required'
+            'email'    => 'required|email',
+            'token'    => 'required|string',
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
         ]);
 
-        $valid = DB::table('password_resets')
-            ->where('email', $request->email)
-            ->where('token', $request->token)
-            ->first();
+        $registro = DB::table('password_resets')->where('email', $request->email)->first();
 
-        if (!$valid) {
-            return back()->withErrors(['email' => 'Token inválido']);
+        $invalido = !$registro
+            || !Hash::check($request->token, $registro->token)
+            || now()->diffInMinutes($registro->created_at, true) >= self::TOKEN_EXPIRATION_MINUTES;
+
+        if ($invalido) {
+            if ($registro) {
+                DB::table('password_resets')->where('email', $request->email)->delete();
+            }
+            return back()->withErrors(['email' => 'El enlace es inválido o ha expirado. Solicita uno nuevo.']);
         }
 
-        User::where('email', $request->email)->update([
-            'password' => Hash::make($request->password),
-            'two_factor_code' => null,
-            'two_factor_expires_at' => null
-        ]);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => 'El enlace es inválido o ha expirado. Solicita uno nuevo.']);
+        }
 
-        DB::table('password_resets')
-            ->where('email', $request->email)
-            ->delete();
+        $user->forceFill([
+            'password'              => Hash::make($request->password),
+            'two_factor_code'       => null,
+            'two_factor_expires_at' => null,
+            'failed_attempts'       => 0,
+            'is_locked'             => 0,
+            'lock_code'             => null,
+            'remember_token'        => Str::random(60),
+        ])->save();
 
-        return redirect('/login')->with('status', 'Contraseña actualizada');
+        // Cerrar todas las sesiones activas del usuario
+        $user->clearSessions();
+
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        return redirect('/login')->with('status', 'Contraseña actualizada. Inicia sesión con tu nueva clave.');
     }
 }

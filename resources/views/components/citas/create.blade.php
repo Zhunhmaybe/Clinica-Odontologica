@@ -219,6 +219,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let debounceTimer = null;
 
+    //Esta funcinon sirve para evitar la inyeccion de codigo malicioso XSS
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function seleccionarPaciente(paciente) {
         campoId.value = paciente.id;
         campoCedula.value = paciente.cedula || '';
@@ -231,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdown.innerHTML = '';
 
         mensajeBusqueda.className = 'mt-2 alert alert-success py-1 px-3 mb-0 d-inline-block small';
-        mensajeBusqueda.innerHTML = '✓ Paciente seleccionado: <strong>' + campoNombre.value + '</strong>';
+        mensajeBusqueda.innerHTML = '✓ Paciente seleccionado: <strong>' + escapeHtml(campoNombre.value) + '</strong>';
         mensajeBusqueda.classList.remove('d-none');
     }
 
@@ -256,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.length === 0) {
                 dropdown.innerHTML = `
                     <div class="p-3 text-center text-muted small">
-                        <div>No se encontraron pacientes que coincidan con <strong>"${q}"</strong></div>
+                        <div>No se encontraron pacientes que coincidan con <strong>"${escapeHtml(q)}"</strong></div>
                         <a href="{{ route('pacientes.create') }}" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
                             + Crear Nuevo Paciente
                         </a>
@@ -264,14 +274,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
                 dropdown.classList.remove('d-none');
             } else {
-                dropdown.innerHTML = data.map(p => `
-                    <div class="suggestion-item" data-patient='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
+                dropdown.innerHTML = data.map((p, idx) => `
+                    <div class="suggestion-item" data-idx="${idx}">
                         <div>
-                            <span class="badge-cedula me-2">${p.cedula}</span>
-                            <span class="patient-main">${p.nombre_completo}</span>
+                            <span class="badge-cedula me-2">${escapeHtml(p.cedula)}</span>
+                            <span class="patient-main">${escapeHtml(p.nombre_completo)}</span>
                         </div>
                         <div class="patient-sub text-end">
-                            ${p.telefono ? '<span>📞 ' + p.telefono + '</span>' : ''}
+                            ${p.telefono ? '<span>📞 ' + escapeHtml(p.telefono) + '</span>' : ''}
                         </div>
                     </div>
                 `).join('');
@@ -280,8 +290,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Asignar eventos de click a cada item
                 dropdown.querySelectorAll('.suggestion-item').forEach(item => {
                     item.addEventListener('click', function () {
-                        const paciente = JSON.parse(this.getAttribute('data-patient'));
-                        seleccionarPaciente(paciente);
+                        const paciente = data[parseInt(this.getAttribute('data-idx'), 10)];
+                        if (paciente) seleccionarPaciente(paciente);
                     });
                 });
             }

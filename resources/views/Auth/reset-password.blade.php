@@ -31,6 +31,7 @@
                                     name="email"
                                     class="form-control"
                                     placeholder="Correo"
+                                    value="{{ old('email', $email ?? '') }}"
                                     required>
                             </div>
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\HistoriaClinica;
 use App\Models\Paciente;
 use App\Models\HcAnamnesis;
@@ -365,7 +366,8 @@ class HistoriaClinicaController extends Controller
                     : 'Historia Clínica HCU-033 firmada y almacenada exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error al guardar la historia clínica: ' . $e->getMessage())->withInput();
+            Log::error('Error al guardar historia clínica: ' . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error al guardar la historia clínica. Intente nuevamente.')->withInput();
         }
     }
 
@@ -767,7 +769,8 @@ class HistoriaClinicaController extends Controller
                     : 'Historia Clínica HCU-033 firmada digitalmente y activada exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error al actualizar el borrador: ' . $e->getMessage())->withInput();
+            Log::error('Error al actualizar borrador de historia clínica: ' . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error al actualizar el borrador. Intente nuevamente.')->withInput();
         }
     }
 
@@ -948,7 +951,8 @@ class HistoriaClinicaController extends Controller
             return response()->json(['success' => true, 'message' => 'Odontograma e índices actualizados correctamente']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            Log::error('Error al guardar odontograma: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Ocurrió un error al guardar el odontograma.'], 500);
         }
     }
 

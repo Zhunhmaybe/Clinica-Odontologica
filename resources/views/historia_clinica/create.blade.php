@@ -1483,6 +1483,15 @@
         }
     }
 
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function renderizarListaOdontogramaWizard() {
         const cont = document.getElementById('wizard-lista-odontograma');
         if (!cont) return;
@@ -1495,17 +1504,24 @@
             if (r.color === '#1e293b') badgeColor = 'bg-dark';
             else if (r.estado === 'bueno') badgeColor = 'bg-primary';
 
+            const piezaNum = parseInt(r.pieza, 10) || 0;
+            const tratSafe = escapeHtml(r.tratamiento);
+            const carasSafe = escapeHtml((r.caras || []).join(', ').toUpperCase());
+            const movSafe = escapeHtml(r.movilidad);
+            const recSafe = escapeHtml(r.recesion);
+            const obsSafe = escapeHtml(r.observacion);
+
             return `
-                <div class="list-group-item list-group-item-action py-2 px-3" style="cursor: pointer;" onclick="abrirModalDiente(${r.pieza})">
+                <div class="list-group-item list-group-item-action py-2 px-3" style="cursor: pointer;" onclick="abrirModalDiente(${piezaNum})">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-primary small"><i class="fas fa-tooth me-1"></i> Pieza ${r.pieza}</strong>
-                        <span class="badge ${badgeColor}">${r.tratamiento}</span>
+                        <strong class="text-primary small"><i class="fas fa-tooth me-1"></i> Pieza ${piezaNum}</strong>
+                        <span class="badge ${badgeColor}">${tratSafe}</span>
                     </div>
                     ${(r.tratamiento === 'Caries' || r.tratamiento === 'Obturado') ? 
-                        `<small class="text-muted d-block" style="font-size:11px;">Caras: ${(r.caras || []).join(', ').toUpperCase()}</small>` : ''}
-                    ${r.movilidad ? `<small class="text-warning d-block" style="font-size:11px;">Movilidad: Grado ${r.movilidad}</small>` : ''}
-                    ${r.recesion ? `<small class="text-info d-block" style="font-size:11px;">Recesión: ${r.recesion}mm</small>` : ''}
-                    ${r.observacion ? `<small class="text-secondary d-block fst-italic" style="font-size:11px;">"${r.observacion}"</small>` : ''}
+                        `<small class="text-muted d-block" style="font-size:11px;">Caras: ${carasSafe}</small>` : ''}
+                    ${r.movilidad ? `<small class="text-warning d-block" style="font-size:11px;">Movilidad: Grado ${movSafe}</small>` : ''}
+                    ${r.recesion ? `<small class="text-info d-block" style="font-size:11px;">Recesión: ${recSafe}mm</small>` : ''}
+                    ${r.observacion ? `<small class="text-secondary d-block fst-italic" style="font-size:11px;">"${obsSafe}"</small>` : ''}
                 </div>
             `;
         }).join('');
