@@ -11,9 +11,9 @@ COPY . .
 RUN npm run build
 
 # ==========================================
-# ETAPA 2: Entorno PHP 8.2 + Apache (Producción)
+# ETAPA 2: Entorno PHP 8.4 + Apache (Producción)
 # ==========================================
-FROM php:8.2-apache
+FROM php:8.4-apache
 WORKDIR /var/www/html
 
 # Instalar dependencias del sistema y extensiones requeridas para PostgreSQL y Laravel
@@ -51,7 +51,7 @@ COPY . .
 COPY --from=frontend /app/public/build ./public/build
 
 # Instalar dependencias PHP optimizadas para producción (sin dev)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php
 
 # Configurar Apache para apuntar a la carpeta /public de Laravel
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
